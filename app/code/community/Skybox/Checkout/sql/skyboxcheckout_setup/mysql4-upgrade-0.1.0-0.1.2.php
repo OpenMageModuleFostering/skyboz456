@@ -14,3 +14,6 @@ $installer->addAttribute('order', 'others_total_usd_skybox', array('type' => 'va
 */
 $installer->endSetup();
 
+die("Exit for now");
+
+    

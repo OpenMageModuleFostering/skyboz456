@@ -57,7 +57,7 @@ class Skybox_Core_Model_Standard
     }
 
     /* @return Skybox_Core_Model_Api_Restful */
-    public function _getApi()
+    protected function _getApi()
     {
         if (null === $this->_api) {
             $this->_api = Mage::getModel($this->_apiType)->setConfigObject($this->_config);
@@ -170,11 +170,6 @@ class Skybox_Core_Model_Standard
         return $this->_api->getStatusMessage();
     }
 
-    public function getCssVersion()
-    {
-        return$this->_api->getCssVersion();
-    }
-
     /**
      * Se invoca al servicio para generar Token de Seguridad
      * @return Skybox_Core_Model_Standard
@@ -270,8 +265,8 @@ class Skybox_Core_Model_Standard
         }
 
 
-        // $total_time = round(microtime(true)-$start, 4);
-        // Mage::log('Servicio generado ['.$action.']: '.$total_time.' segundos.', null, 'timer.log',true);
+        $total_time = round(microtime(true)-$start, 4);
+        Mage::log('Servicio generado ['.$action.']: '.$total_time.' segundos.', null, 'timer.log',true);
 
         return $this;
     }

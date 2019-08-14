@@ -1,59 +1,29 @@
-<?php
-
-/**
- * @param $string
- *
- * @return bool
- * @see https://stackoverflow.com/a/30231906
- */
-function isValidBase64($string)
-{
-    $decoded = base64_decode($string, true);
-
-    // Check if there is no invalid character in string
-    if ( ! preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $string)) {
-        return false;
-    }
-
-    // Decode the string in strict mode and send the response
-    if ( ! base64_decode($string, true)) {
-        return false;
-    }
-
-    // Encode and compare it to original one
-    if (base64_encode($decoded) != $string) {
-        return false;
-    }
-
-    return true;
-}
-
-$message = Mage::getSingleton('core/session')->getSkyboxSuccessMsg();
-
-$invoice_html = '';
-if (isset($_POST['INVOICE_HTML'])) {
-    $invoice_html = $_POST['INVOICE_HTML'];
-    if (isValidBase64($invoice_html)) {
-        $invoice_html = base64_decode($invoice_html);
-    }
-}
-
-$script_cart = '';
-if (isset($_POST['TAG_CART_ORDERED'])) {
-    $script_cart = $_POST['TAG_CART_ORDERED'];
-    if (isValidBase64($script_cart)) {
-        $script_cart = base64_decode($script_cart);
-    }
-}
-
-?>
-
 <div>
     <?php
+    $message = Mage::getSingleton('core/session')->getSkyboxSuccessMsg();
     if (isset($message)) {
         echo $message;
-    } ?>
-    <br/><br/>
-    <?php echo $invoice_html; ?>
-    <?php echo $script_cart; ?>
+    }
+    echo "<br/><br/>";
+    /*echo $_POST["STATUS"] . "<br/>";
+    echo $_POST["STATUS_DESCRIPTION"] . "<br/>";
+    echo $_POST["ORDER_NUMBER"] . "<br/>";
+    echo $_POST["CUSTOMER_EMAIL"] . "<br/>";
+    echo $_POST["CUSTOMER_NAME"] . "<br/>";
+    echo $_POST["CUSTOMER_ID"] . "<br/>";
+    echo $_POST["CUSTOMER_ADDRESS"] . "<br/>";
+    echo $_POST["CUSTOMER_COUNTRY"] . "<br/>";
+    echo $_POST["CUSTOMER_REGION"] . "<br/>";
+    echo $_POST["CUSTOMER_CITY"] . "<br/>";
+    echo $_POST["CUSTOMER_ZIPCODE"] . "<br/>";
+    echo $_POST["ORDER_CURRENCY"] . "<br/>";
+    echo $_POST["ORDER_AMOUNT"] . "<br/>";
+    echo $_POST["ORDER_PAYMENT_METHOD"] . "<br/>";
+    echo $_POST["ORDER_CONCEPTS"] . "<br/><br/>";*/
+
+    echo $_POST["INVOICE_HTML"] . "<br/>";
+    /*if (isset($_POST['ORDER_CONCEPTS'])
+		foreach ($_POST['ORDER_CONCEPTS'] as $value)
+			echo $value . "<br/>";*/
+    ?>
 </div>

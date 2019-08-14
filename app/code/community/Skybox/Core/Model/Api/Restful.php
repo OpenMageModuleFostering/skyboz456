@@ -70,7 +70,6 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         return $this;
     }
 
-    // @todo Rewrite the way to get GUID
     public function getGuidApi()
     {
         $guidId = null;
@@ -78,17 +77,16 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         foreach ($quote->getAllItems() as $item) {
             $guidId = $item->getGuidSkybox();
-            Mage::log(' | CallApiRest->Error1 | ', null, 'guid.log', true);
-            Mage::log("getGuidApi(): GuidID found (quote):  " . $guidId, null, 'guid.log', true);
+             Mage::log(' | CallApiRest->Error1 | ', null, 'guid.log', true);
+            Mage::log("getGuidApi(): GuidID found (quote):  ".$guidId, null, 'guid.log', true);
             break;
         }
 
         if (!$guidId) {
             $skyboxSession = $this->_config->getSession()->getCookieGuid();
             if ($skyboxSession) {
-                // Mage::log(' | CallApiRest->Error2 | ', null, 'guid.log', true);
-                Mage::log("Call getGuidApi() from getSession(): " . $this->_config->getSession()->getCookieGuid(), null,
-                    'guid.log', true);
+                Mage::log(' | CallApiRest->Error2 | ', null, 'guid.log', true);
+                Mage::log("Call getGuidApi() from getSession(): " .$this->_config->getSession()->getCookieGuid(),null, 'guid.log', true);
                 $guidId = $this->_config->getSession()->getCookieGuid();
             }
         }
@@ -120,6 +118,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
     }
 
 
+
     public function getLocationAllow()
     {
         return $this->_config->getSession()->getLocationAllow();
@@ -132,23 +131,9 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         $this->_config->getSession()->setStoreCode($storeCode);
         return $storeCode;
     }
-
     public function getStoreCode()
     {
         return $this->_config->getSession()->getStoreCode();
-    }
-
-    public function setCssVersion($value = null)
-    {
-        $cssVersion = $this->getResponseJson()->{Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_CSS_VERSION};
-        $cssVersion = (isset($cssVersion)) ? trim($cssVersion) : 1;
-        $this->_config->getSession()->setCssVersion($cssVersion);
-        return $cssVersion;
-    }
-
-    public function getCssVersion()
-    {
-        return $this->_config->getSession()->getCssVersion();
     }
 
     /**
@@ -216,8 +201,6 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
      */
     public function CallService($method, $params)
     {
-        $params['platform'] = "magento-".Mage::getVersion();
-        $params['version']  = "v.".Skybox_Core_Model_Config::SKYBOX_VERSION;
         $start_time = time();
         try {
             /**
@@ -228,6 +211,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
              * 4: Asignamos valores a los parametros
              * 5: Guardamos la respuesta del servicio
              */
+
             $this->setUrlService($method, $params)
                 ->SaveRequestService()
                 ->SetResponseService()
@@ -268,7 +252,6 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
                 }
                 $this->setLocationAllow();
                 $this->setStoreCode();
-                $this->setCssVersion();
                 $this->setHtmlTemplateBar();
                 break;
             case Skybox_Core_Model_Config::SKYBOX_ACTION_GET_TEMPLATE_BUTTON:
@@ -334,9 +317,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
 
     function file_get_contents_curl($url)
     {
-        if (!function_exists("curl_init")) {
-            die("cURL extension is not installed");
-        }
+        if (!function_exists("curl_init")) die("cURL extension is not installed");
         $ch = curl_init();
         // Disable SSL verification
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

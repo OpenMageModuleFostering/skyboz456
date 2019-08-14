@@ -11,7 +11,7 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
 {
     public function indexAction()
     {
-        /** @var $checkout_cart Mage_Checkout_Model_Session */
+        /* var $checkout_cart Mage_Checkout_Model_Session */
         $checkout_cart = Mage::getSingleton('checkout/cart');
         $items = $checkout_cart->getItems();
 
@@ -19,29 +19,6 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
             $this->getResponse()->setRedirect(
                 Mage::getUrl('checkout/cart')
             );
-        }
-
-        $cart_count = Mage::helper('checkout/cart')->getSummaryCount();
-
-        /** @var $config Skybox_Checkout_Model_Config */
-        $config = Mage::getModel('skyboxcore/config');
-        $cart = $config->getSession()->getCartSkybox();
-
-        $cartItemCount = 0;
-        if (!empty($cart)) {
-            $cartItemCount = intval($cart->{'CartItemCount'});
-        }
-
-        /** @var $api_mproduct Skybox_Catalog_Model_Api_Product */
-        $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
-
-        if ($cart_count != $cartItemCount && $api_mproduct->getLocationAllow()) {
-
-            $processUrl = Mage::getUrl() . 'skbcheckout/process';
-            $returnUrl = Mage::getUrl() . 'skbcheckout/international';
-
-            $url = $processUrl . '?return_url=' . $returnUrl;
-            $this->getResponse()->setRedirect($url);
         }
 
         $this->loadLayout();
@@ -52,9 +29,8 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
 
     public function successAction()
     {
-        // Mage::log("Call true: successAction limpiar carro", null, 'local.log', true);
-        // Mage::getSingleton('checkout/cart')->truncate()->save();
-        Mage::getSingleton('checkout/cart')->truncateMgCart()->save();
+        Mage::log("Call true: successAction limpiar carro", null, 'gary.log', true);
+        Mage::getSingleton('checkout/cart')->truncate()->save();
 
         $_config = Mage::getModel('skyboxcore/config');
         $cart = $_config->getSession()->getCartSkybox();

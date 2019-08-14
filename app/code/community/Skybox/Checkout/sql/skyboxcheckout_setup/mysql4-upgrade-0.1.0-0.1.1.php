@@ -1,6 +1,6 @@
 <?php
 
-echo 'Running This Upgrade: ' . get_class($this) . "\n <br /> \n";
+echo 'Running This Upgrade: '.get_class($this)."\n <br /> \n";
 
 
 $installer = new Mage_Sales_Model_Mysql4_Setup('core_setup');
@@ -66,3 +66,7 @@ $installer->addAttribute('order', 'concepts_skybox', array('type' => 'text', 'vi
 */
 
 $installer->endSetup();
+
+die("Exit for now");
+
+    

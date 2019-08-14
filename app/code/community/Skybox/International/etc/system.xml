@@ -81,10 +81,8 @@
                         <skyboxintegration translate="label">
                             <label>SkyBox Itegration:</label>
                             <comment>SkyBox Integration</comment>
-                            <frontend_type>select</frontend_type>
-                            <!--<source_model>adminhtml/system_config_source_yesno</source_model>-->
-                            <source_model>Skybox_International_Model_StoreType</source_model>
-                            <!--<frontend_type>text</frontend_type>-->
+                            <frontend_type>text</frontend_type>
+                            <!-- validate>validate-email</validate -->
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

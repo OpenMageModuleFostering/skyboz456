@@ -14,8 +14,6 @@
  */
 class Skybox_Core_Model_Config
 {
-
-    const SKYBOX_VERSION = "1.2.11";
     /**
      * Skybox cookie
      * @var string
@@ -103,8 +101,6 @@ class Skybox_Core_Model_Config
     const SKYBOX_PARAMETER_RESPONSE_PRODUCT_ADJUST_PRICE = "ProductAdjustment";
     const SKYBOX_PARAMETER_RESPONSE_PRODUCT_ADJUST_PRICE_USD = "ProductAdjustmentUSD";
     const SKYBOX_PARAMETER_RESPONSE_PRODUCT_LABEL_ADJUST = "WidgetLabelAdjustment";
-
-    const SKYBOX_PARAMETER_RESPONSE_CSS_VERSION = "CssVersion";
 
     const SKYBOX_CURRENCY_USD = "USD";
 

@@ -5,12 +5,10 @@
  *
  * @category    Skybox
  * @package     Skybox_Checkout
- * @copyright   Copyright (c) 2014 - 2017 Skybox Checkout. (http://www.skyboxcheckout.com)
+ * @copyright   Copyright (c) 2014 Skybox Checkout. (http://www.skyboxcheckout.com)
  */
 class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 {
-    const MESSAGE_FAIL_TO_ADD_PRODUCT = '[sales] Failed to add the product to the cart.';
-
     protected $_api = null;
     protected $_product = null;
     protected $_enable = null;
@@ -24,41 +22,12 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         return $this->_api;
     }
 
-    protected function _getAllowHelper()
-    {
-        return Mage::helper('skyboxcore/allow');
-    }
-
-    // @todo : Move this logic to a helper
     private function isEnable()
     {
-        if ($this->_enable == null) {
-
-            $isActive = boolval(Mage::helper('skyboxinternational/data')->getActive());
-
-            if (!$isActive) {
-                return false;
-            }
-
-            $isEnable = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
-
-            if (!$isEnable) {
-                return false;
-            }
-
-            $allowHelper = Mage::helper('skyboxcore/allow');
-
-            if (!$allowHelper->isOperationCartEnabled()) {
-                return false;
-            }
-
-            $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
-
-            if (!$api_mproduct->getLocationAllow()) {
-                return false;
-            }
-
-            $this->_enable = true;
+        if (null === $this->_enable) {
+//            $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+            $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+            $this->_enable = $value;
         }
         return $this->_enable;
     }
@@ -91,9 +60,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         //Mage::log(print_r($super_group, true), null, 'cart.log', true);
 
         foreach ($super_group as $item => $qty) {
-            if ($qty <= 0) {
-                continue;
-            }
+            if ($qty <= 0) continue;
 
             //Mage::log("Product: " . $item . " - " . $qty, null, 'cart.log', true);
 
@@ -116,15 +83,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
             $this->_getProductApi()->CalculatePrice($product, null);
 
             if ($this->_getProductApi()->HasError()) {
-
-                $message = self::MESSAGE_FAIL_TO_ADD_PRODUCT;
-
-                if ($this->_getProductApi()->_getApi()->ErrorRatesNotFound()) {
-                    $languageId = $this->getLanguageId();
-                    $message = $this->_getProductApi()->_getApi()->getErrorRatesNotFoundMessage($languageId);
-                }
                 Mage::throwException(
-                    Mage::helper('sales')->__($message)
+                    Mage::helper('sales')->__('[sales] Failed to add the product to the cart.')
                 );
                 return $this;
             }
@@ -165,15 +125,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         $this->_getProductApi()->CalculatePrice($product, $request);
 
         if ($this->_getProductApi()->HasError()) {
-
-            $message = self::MESSAGE_FAIL_TO_ADD_PRODUCT;
-
-            if ($this->_getProductApi()->_getApi()->ErrorRatesNotFound()) {
-                $languageId = $this->getLanguageId();
-                $message = $this->_getProductApi()->_getApi()->getErrorRatesNotFoundMessage($languageId);
-            }
             Mage::throwException(
-                Mage::helper('sales')->__($message)
+                Mage::helper('sales')->__('[sales] Failed to add the product to the cart.')
             );
             return $this;
         }
@@ -188,7 +141,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
         $_data = $this->_getProductApi()->getProductData();
 
-//        Mage::log("Bundleproduct=Cart=" . print_r($_data, true), null, 'cart.log', true);
+        Mage::log("Bundleproduct=Cart=".print_r($_data, true), null, 'cart.log', true);
 
         $this->_getApi()->AddProductOfCart($_data, $request->getQty());
 
@@ -218,24 +171,17 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
             return $this;
         }
 
-        $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
-
-        if (!$api_mproduct->getLocationAllow()) {
-            parent::addProduct($productInfo, $requestInfo);
-            return $this;
-        }
-
         //Mage::log(__FILE__.' # '.__LINE__.' ~ '. __METHOD__.' => enter addProduct', null, 'tracer.log', true);
         $product = $this->_getProduct($productInfo);
         $request = $this->_getProductRequest($requestInfo);
 
         if ($product->isGrouped()) {
-//            Mage::log("Product: " . $product->getName() . " is Grouped", null, 'cart.log', true);
+            Mage::log("Product: " . $product->getName() . " is Grouped", null, 'cart.log', true);
             return $this->addGroupedProduct($productInfo, $requestInfo);
         }
 
         if ($product->getTypeId() == 'bundle') {
-//            Mage::log("Product: " . $product->getName() . " is Bundle", null, 'cart.log', true);
+            Mage::log("Product: " . $product->getName() . " is Bundle", null, 'cart.log', true);
             return $this->addBundleProduct($productInfo, $requestInfo);
         }
 
@@ -243,22 +189,15 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         $this->_getProductApi()->CalculatePrice($product, $request);
 
         if ($this->_getProductApi()->HasError()) {
-
-            $message = self::MESSAGE_FAIL_TO_ADD_PRODUCT;
-
-            if ($this->_getProductApi()->_getApi()->ErrorRatesNotFound()) {
-                $languageId = $this->getLanguageId();
-                $message = $this->_getProductApi()->_getApi()->getErrorRatesNotFoundMessage($languageId);
-            }
+            //Mage::log('error en el calculate price skybox', null, 'tracer.log', true);
             Mage::throwException(
-                Mage::helper('sales')->__($message)
+                Mage::helper('sales')->__('[sales] Failed to add the product to the cart.')
             );
             return $this;
         }
 
-        // $productId = $product->getId();
+        //$productId = $product->getId();
         $productId = $this->_getProductApi()->getProductId();
-//        Mage::log("AddProduct::: productId ::: ". $productId,null, 'updateCart.log', true);
 
         if ($product->getStockItem()) {
             $minimumQty = $product->getStockItem()->getMinSaleQty();
@@ -280,7 +219,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         ));
 
         $_data = $this->_getProductApi()->getProductData();
-//        Mage::log("product=Cart=" . print_r($_data, true), null, 'cart.log', true);
+        Mage::log("product=Cart=".print_r($_data, true), null, 'cart.log', true);
         $this->_getApi()->setCurrentProduct($product);
         $this->_getApi()->AddProductOfCart($_data, $request->getQty());
 
@@ -292,13 +231,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         $productIdSkybox = $this->_getApi()->getParameter(
             Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_ID, "0");
 
-        try {
-            $quote = parent::addProduct($productInfo, $requestInfo);
-            $this->_updateQuoteItem($productId, $productIdSkybox);
-        } catch (\Exception $e) {
-            Mage::log($e->getMessage(), null, 'tracer.log', true);
-        }
-
+        $quote = parent::addProduct($productInfo, $requestInfo);
+        $this->_updateQuoteItem($productId, $productIdSkybox);
         return $quote;
     }
 
@@ -318,12 +252,10 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
         //Mage::log('Entro skybox addProductsByIds', null, 'tracer.log', true);
         //Mage::log(print_r($productIds,true), null, 'tracer.log', true);
-        if (count($productIds) > 0) {
-            foreach ($productIds as $idproduct) {
+        if(count($productIds)>0){
+            foreach ($productIds as $idproduct){
                 $idproduct = trim($idproduct);
-                if (empty($idproduct)) {
-                    continue;
-                }
+                if(empty($idproduct)) continue;
                 $this->addProduct($idproduct);
             }
         }
@@ -333,18 +265,16 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
     private function _updateQuoteItem($productId, $productIdSkybox)
     {
-//        Mage::log("_updateQuoteItem::: productId ::: ". $productId,null, 'updateCart.log', true);
-//        Mage::log("_updateQuoteItem::: productIdSkybox ::: ". $productIdSkybox,null, 'updateCart.log', true);
-//        Mage::log('pas x aqui2', null, 'minicars.log', true);
+        Mage::log('pas x aqui2', null, 'minicars.log', true);
 
 
         /**
          * only one time for call to service start - Active
          * when do add to cart
          */
-        $session = Mage::getSingleton("core/session", array("name" => "frontend"));
+        $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
         $session->setData("callToSkyBox", true);
-        //Mage::log("Call true: add to cart", null, 'local.log', true);
+        Mage::log("Call true: add to cart", null, 'gary.log', true);
         /**
          * when do add to cart end - Active
          */
@@ -364,13 +294,13 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                 $isLocationAllow = false;
                 //$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
                 $typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
-                if ($typeIntegration == 3) {
+                if ($typeIntegration==3) {
                     $isLocationAllow = true;
                 }
                 /**
                  * Integration 3 end, show price shop in cart*
                  */
-                if ($isLocationAllow) {
+                if($isLocationAllow) {
                     $productModel = Mage::getModel('catalog/product')->load($productId);
                     $total = str_replace(",", "", $productModel->getTotalPriceUSD());
                     $item->setIdProductSkybox($productIdSkybox);
@@ -381,7 +311,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                     $item->setInsuranceSkybox($productModel->getInsurance());
                     $item->setPriceSkybox($productModel->getPrice());
                     $item->setTotalSkybox($productModel->getTotalPrice());
-                    // $item->setRowTotal($total);
+                    $item->setRowTotal($total);
 
                     // Currency amounts in the USD Currency
                     $item->setCustomsUsdSkybox($productModel->getCustomsUSD());
@@ -402,9 +332,9 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                     //$item->setOriginalCustomPrice($this->_getProductApi()->getTotalPriceUSD());
                     //$item->setOriginalCustomPrice($total);
 //                $item->setOriginalCustomPrice($this->_getProductApi()->getPrice());
-//                    $prices = str_replace(',', '', $productModel->getPrice());
-//                    $prices = number_format((float)($prices), 2, ',', '.');
-//                    $item->setOriginalCustomPrice($prices);
+                    $prices = str_replace(',','',$productModel->getPrice());
+                    $prices = number_format((float)($prices),2, ',', '.');
+                    $item->setOriginalCustomPrice($prices);
                     //$skybox_total = str_replace(",", "", $this->_getProductApi()->getTotalPrice());
                     $skybox_total = str_replace(",", "", $productModel->getPrice());
                     $row_total = floatval($skybox_total) * $item->getQty();
@@ -419,7 +349,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                     $item->setInsuranceSkybox($this->_getProductApi()->getInsurance());
                     $item->setPriceSkybox($this->_getProductApi()->getPrice());
                     $item->setTotalSkybox($this->_getProductApi()->getTotalPrice());
-//                    $item->setRowTotal($total);
+                    $item->setRowTotal($total);
 
                     // Currency amounts in the USD Currency
                     $item->setCustomsUsdSkybox($this->_getProductApi()->getCustomsUSD());
@@ -430,6 +360,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
                     $item->setGuidSkybox($this->_getProductApi()->getGuidSkybox()); //Set GUID
 
+
                     $item->setBasePriceSkybox($this->_getProductApi()->getBasePrice());
                     $item->setBasePriceUsdSkybox($this->_getProductApi()->getBasePriceUSD());
                     $item->setAdjustTotalSkybox($this->_getProductApi()->getAdjustPrice());
@@ -439,14 +370,16 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                     //$item->setOriginalCustomPrice($this->_getProductApi()->getTotalPriceUSD());
                     //$item->setOriginalCustomPrice($total);
 //                $item->setOriginalCustomPrice($this->_getProductApi()->getPrice());
-//                    $prices = str_replace(',', '', $this->_getProductApi()->getPrice());
-//                    $prices = number_format((float)($prices), 2, ',', '.');
-//                    $item->setOriginalCustomPrice($prices);
+                    $prices = str_replace(',','',$this->_getProductApi()->getPrice());
+                    $prices = number_format((float)($prices),2, ',', '.');
+                    $item->setOriginalCustomPrice($prices);
                     //$skybox_total = str_replace(",", "", $this->_getProductApi()->getTotalPrice());
                     $skybox_total = str_replace(",", "", $this->_getProductApi()->getPrice());
                     $row_total = floatval($skybox_total) * $item->getQty();
                     $item->setRowTotalSkybox($row_total);
                 }
+
+
                 break;
             }
         }
@@ -498,8 +431,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
                 //$item->setOriginalCustomPrice($this->_getProductApi()->getTotalPriceUSD());
                 //$item->setOriginalCustomPrice($total);
 //                $item->setOriginalCustomPrice($this->_getProductApi()->getPrice());
-                $prices = str_replace(',', '', $this->_getProductApi()->getPrice());
-                $prices = number_format((float)($prices), 2, ',', '.');
+                $prices = str_replace(',','',$this->_getProductApi()->getPrice());
+                $prices = number_format((float)($prices),2, ',', '.');
                 $item->setOriginalCustomPrice($prices);
                 //$skybox_total = str_replace(",", "", $this->_getProductApi()->getTotalPrice());
                 $skybox_total = str_replace(",", "", $this->_getProductApi()->getPrice());
@@ -524,9 +457,9 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
          * only one time for call to service start - Active
          * when do remove
          */
-        $session = Mage::getSingleton("core/session", array("name" => "frontend"));
+        $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
         $session->setData("callToSkyBox", true);
-        //Mage::log("Call true: remove", null, 'local.log', true);
+        Mage::log("Call true: remove", null, 'gary.log', true);
         /**
          * when do remove
          */
@@ -566,9 +499,9 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
          * only one time for call to service start - Active
          * when do remove
          */
-        $session = Mage::getSingleton("core/session", array("name" => "frontend"));
+        $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
         $session->setData("callToSkyBox", true);
-        //Mage::log("Call true: update cart", null, 'local.log', true);
+        Mage::log("Call true: update cart", null, 'gary.log', true);
         /**
          * when do remove
          */
@@ -577,7 +510,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
             return $this;
         }
 
-        Mage::log('pas x aqui5', null, 'cartdetail.log', true);
+        Mage::log('pas x aqui5', null, 'minicars.log', true);
         //Mage::log(print_r($data, true), null, 'tracer.log', true);
         //Mage::log("Skybox_Checkout_Checkout_Model_Cart updateItem");
         //return parent::updateItems($data);
@@ -614,7 +547,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
                 $idProductSkybox = $item->getIdProductSkybox();
 
-                // $this->_getApi()->UpdateProductOfCart($idProductSkybox, $qty);
+                $this->_getApi()->UpdateProductOfCart($idProductSkybox, $qty);
 
                 $item->setQty($qty);
 
@@ -629,7 +562,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
             }
         }
 
-        // Mage::dispatchEvent('checkout_cart_update_items_after', array('cart'=>$this, 'info'=>$data));
+        //Mage::dispatchEvent('checkout_cart_update_items_after', array('cart'=>$this, 'info'=>$data));
         $current = parent::updateItems($data);
         return $current;
     }
@@ -648,70 +581,6 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
         parent::truncate();
         return $this;
-    }
-
-    /**
-     * Mark all quote items as deleted (empty shopping cart)
-     * @return $this
-     */
-    public function truncateMgCart()
-    {
-        parent::truncate();
-        return $this;
-    }
-
-    /**
-     * Update item in shopping cart (quote)
-     * $requestInfo - either qty (int) or buyRequest in form of array or Varien_Object
-     * $updatingParams - information on how to perform update, passed to Quote->updateItem() method
-     */
-    public function updateItem($itemId, $requestInfo = null, $updatingParams = null)
-    {
-        if (!$this->isEnable()) {
-            $result = parent::updateItem($itemId, $requestInfo, $updatingParams);
-            return $result;
-        }
-
-        $item = $this->getQuote()->getItemById($itemId);
-        $skyboxProductId = $item->getIdProductSkybox();
-        $_quoteItemId = $item->getId();
-        $_qty = $item->getQty();
-
-        /** @var Mage_Sales_Model_Quote_Item $result */
-        $result = parent::updateItem($itemId, $requestInfo, $updatingParams);
-        $quoteItemId = $result->getId();
-        $qty = $result->getQty();
-
-        // Update Product
-        if ($quoteItemId == $_quoteItemId) {
-            $this->_getApi()->UpdateProductOfCart($skyboxProductId, $qty);
-        } else {
-            // Delete and Add a New Product
-            $this->_getApi()->DeleteProductOfCart($skyboxProductId);
-
-            $product = $result->getProduct();
-            $this->_getProductApi()->CalculatePrice($product, $requestInfo);
-
-            $_data = $this->_getProductApi()->getProductData();
-            $this->_getApi()->setCurrentProduct($product);
-            $this->_getApi()->AddProductOfCart($_data, $qty);
-
-            $productId = $result->getProduct()->getId();
-            $skyboxProductId = $this->_getApi()->getParameter(
-                Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_ID, "0");
-
-            $this->_updateQuoteItem($productId, $skyboxProductId);
-        }
-
-        return $result;
-    }
-
-    private function getLanguageId()
-    {
-        $_config = Mage::getModel('skyboxcore/config');
-        $cart = $_config->getSession()->getCartSkybox();
-        $id = $cart->{'LanguageId'};
-        return intval($id);
     }
 
 }
