@@ -66,7 +66,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
      */
     public function CalculatePrice($product, $request, $finalPrice = null, $type = null, $objectId = 1)
     {
-        Mage::log("ApiProductCatalog ", null, 'orden.log', true);
+//        Mage::log("--------------------------------------", null, 'verify.log', true);
 
         //Mage::log(print_r('Product', true), null, 'tracer.log', true);
 
@@ -79,6 +79,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
             $storeId = Mage::app()->getStore()->getStoreId();
             $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($product);
         }
+//        Mage::log("CalculatePrice '". $product->getTypeId()."'", null, 'verify.log', true);
+//        Mage::log("CalculatePrice FinalPrice '". $product->getFinalPrice()."'", null, 'verify.log', true);
 
         $productId = $product->getId();
         $_data = null;
@@ -92,8 +94,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
             case 'simple':
                 $finalPrice = isset($finalPrice) ? $finalPrice : $product->getFinalPrice();
                 $category_id = $product->getSkyboxCategoryId();
-                $category_id = isset($category_id) ? $product->getSkyboxCategoryId() : 0;
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $category_id = isset($category_id) ? $category_id : $this->getCommodityFromCategory($product);
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
 
                 $_data = array(
                     'object_id' => 1,
@@ -101,7 +103,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                     'sku' => $product->getSku(),
                     'category_id' => $category_id,
                     'final_price' => $finalPrice,
-                    'weight' => ($product->getWeight())?$product->getWeight():1,
+                    'weight' => ($product->getWeight()) ? $product->getWeight() : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -112,11 +114,12 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
             case 'configurable':
 
-                $finalPrice = isset($finalPrice) ? $finalPrice : null;
+//                $finalPrice = isset($finalPrice) ? $finalPrice : null;
+                $finalPrice = isset($finalPrice) ? $finalPrice : $product->getFinalPrice();
                 $weight = $product->getTypeInstance(true)->getWeight($product);
                 $sku = $product->getSku();
 
-                Mage::log("CalculatePrice configurable : " . $finalPrice, null, 'skyboxcheckout.log', false);
+//                Mage::log("CalculatePrice configurable: '" . $finalPrice."'", null, 'verify.log', true);
 
                 if ($request) {
                     $childProduct = Mage::getModel('catalog/product_type_configurable')
@@ -130,7 +133,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 $parentItem = null;
 
                 if (isset($request) && !$finalPrice) {
-                    Mage::log("CalculatePrice candidate INI", null, 'skyboxcheckout.log', false);
+//                    Mage::log("CalculatePrice candidate INI ", null, 'verify.log', true);
                     $_finalPrice = 0;
 
                     $cartCandidates = $product->getTypeInstance(true)
@@ -141,8 +144,10 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                         $stickWithinParent = $candidate->getParentProductId() ? $parentItem : null;
                         $candidate->setStickWithinParent($stickWithinParent);
 
-                        $candidate_getFinalPrice = $candidate->getPriceModel()->getFinalPrice($request->getQty(), $product);
-                        Mage::log("CalculatePrice candidate getFinalPrice: " . $candidate_getFinalPrice, null, 'skyboxcheckout.log', false);
+                        $candidate_getFinalPrice = $candidate->getPriceModel()->getFinalPrice($request->getQty(),
+                            $product);
+//                        Mage::log("CalculatePrice candidate getFinalPrice: " . $candidate_getFinalPrice, null,
+//                            'skyboxcheckout.log', false);
 
                         $_finalPrice = $_finalPrice + $candidate_getFinalPrice;
                         if ($_finalPrice) {
@@ -150,7 +155,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                         }
                     }
                     $finalPrice = $_finalPrice;
-                    Mage::log("CalculatePrice candidate FIN", null, 'skyboxcheckout.log', false);
+//                    Mage::log("CalculatePrice candidate FIN", null, 'verify.log', true);
                 }
 
                 /* Weight start*/
@@ -179,15 +184,18 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 */
                 /* Weight end*/
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $category_id = $product->getSkyboxCategoryId();
+                $category_id = isset($category_id) ? $category_id : $this->getCommodityFromCategory($product);
+
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
                 $_data = array(
                     'object_id' => 1,
                     'name' => $product->getName(),
                     //'sku' => $product->getSku(),
                     'sku' => $sku,
-                    'category_id' => $product->getSkyboxCategoryId(),
+                    'category_id' => $category_id,
                     'final_price' => $finalPrice,
-                    'weight' => $weight?$weight:1,
+                    'weight' => $weight ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -242,14 +250,17 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 //Mage::log("weight: " . $weight, null, 'cart.log', true);
                 //Mage::log("sku: " . $sku, null, 'cart.log', true);
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $category_id = $product->getSkyboxCategoryId();
+                $category_id = isset($category_id) ? $category_id : $this->getCommodityFromCategory($product);
+
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
                 $_data = array(
                     'object_id' => 1,
                     'name' => $product->getName(),
                     'sku' => $sku,
-                    'category_id' => $product->getSkyboxCategoryId(),
+                    'category_id' => $category_id,
                     'final_price' => $finalPrice,
-                    'weight' => ($weight)?$weight:1,
+                    'weight' => ($weight) ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -259,6 +270,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 break;
 
             case 'bundle_fixed':
+
+                // @Note: It should be rewrite!!
                 $finalPrice = isset($finalPrice) ? $finalPrice : null;
                 $skyboxCategoryId = $product->getSkyboxCategoryId();
                 $weight = $product->getTypeInstance(true)->getWeight($product);
@@ -282,7 +295,9 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                     $_weight = $_weight + $product_simple->getWeight();
 
                     if (!$_skyboxCategoryId) { // Set SkyboxCategory from the first Simple Product
-                        $_skyboxCategoryId = $product_simple->getSkyboxCategoryId();
+                        // $_skyboxCategoryId = $product_simple->getSkyboxCategoryId();
+                        $_skyboxCategoryId = $product->getSkyboxCategoryId();
+                        $_skyboxCategoryId = isset($_skyboxCategoryId) ? $_skyboxCategoryId : $this->getCommodityFromCategory($product);
                     }
                 }
 
@@ -302,14 +317,15 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 Mage::log("weight: " . $weight, null, 'cart.log', true);
                 Mage::log("sku: " . $sku, null, 'cart.log', true);*/
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
                 $_data = array(
                     'object_id' => 1,
                     'name' => $product->getName(),
                     'sku' => $sku,
                     'category_id' => $skyboxCategoryId,
                     'final_price' => $finalPrice,
-                    'weight' => ($weight)?$weight:1,
+                    'weight' => ($weight) ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -320,16 +336,17 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 break;
 
             default:
-                Mage::log("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice", null, 'skyboxcheckout.log', false);
+                Mage::log("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice",
+                    null, 'verify.log', false);
                 trigger_error("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice");
                 $defaultSwitch = true;
                 break;
         }
 
-        if(!$defaultSwitch){
+        if (!$defaultSwitch) {
             //Mage::log(print_r('EnableTax: ', true), null, 'tracer.log', true);
             //Mage::log(print_r($this->getEnabledAddSumTaxToPrice(), true), null, 'tracer.log', true);
-            if($this->getEnabledAddSumTaxToPrice()) {
+            if ($this->getEnabledAddSumTaxToPrice()) {
                 $store = Mage::app()->getStore('default');
                 $taxCalculation = Mage::getModel('tax/calculation');
                 $request = $taxCalculation->getRateRequest(null, null, null, $store);
@@ -357,12 +374,17 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
             //Mage::log(print_r('####################### Data produc params #######################', true), null, 'tracer.log', true);
             //Mage::log(print_r($_data, true), null, 'tracer.log', true);
-            $this->_calculatePrice($_data);
+            // $this->_calculatePrice($_data);
+            try {
+                $this->_calculatePrice($_data);
+            } catch (\Exception $e) {
+                Mage::log($e->getMessage(), null, 'skyboxcheckout.log', false);
+            }
         }
 
-        Mage::log("Product Class: " . get_class($product), null, 'skyboxcheckout.log', false);
-        Mage::log("Product Type: " . $type, null, 'skyboxcheckout.log', false);
-        Mage::log(print_r($_data, true), null, 'skyboxcheckout.log', false);
+//        Mage::log("Product Class: " . get_class($product), null, 'verify.log', false);
+//        Mage::log("Product Type: " . $type, null, 'verify.log', false);
+//        Mage::log(print_r($_data, true), null, 'verify.log', false);
 
         $this->_product_data = $_data;
         $this->_product_id = $productId;
@@ -393,7 +415,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
             'storeproductcategory' => $data['category_id'],
             'storeproductprice' => $data['final_price'],
             //'storeproductprice' => $product->getFinalPrice(),
-            'weight' => ($data['weight'])?$data['weight']:1,
+            'weight' => ($data['weight']) ? $data['weight'] : 1,
             'weightunit' => $this->getWeightUnit(),
             'storeproductimgurl' => $data['image_url'],
             'merchantproductid' => $data['merchantproductid']
@@ -420,7 +442,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
     {
         Mage::log("ApiProduct ", null, 'orden.log', true);
         if (!$this->getErrorAuthenticate() && $this->_getApi()->getLocationAllow() && !$this->_getApi()->ErrorServiceNotController()) {
-        //if (!$this->getErrorAuthenticate() && $this->_getApi()->getLocationAllow() && !$this->_getApi()->ErrorService()) {
+            //if (!$this->getErrorAuthenticate() && $this->_getApi()->getLocationAllow() && !$this->_getApi()->ErrorService()) {
             $_productResult = $this->getResponse();
             $template = $_productResult->TooltipButtonTemplate;
             return $template;
@@ -462,8 +484,10 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
     public function IsUSD()
     {
-        if (null == $this->_isUSD)
-            $this->_isUSD = ($this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_CART_CURRENCY_ISO, "") == Skybox_Core_Model_Config::SKYBOX_CURRENCY_USD);
+        if (null == $this->_isUSD) {
+            $this->_isUSD = ($this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_CART_CURRENCY_ISO,
+                    "") == Skybox_Core_Model_Config::SKYBOX_CURRENCY_USD);
+        }
         return $this->_isUSD;
     }
 
@@ -494,27 +518,32 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
     public function getCustomsUSD()
     {
-        return $this->IsUSD() ? $this->getCustoms() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_CUSTOMS_USD, "0");
+        return $this->IsUSD() ? $this->getCustoms() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_CUSTOMS_USD,
+            "0");
     }
 
     public function getShippingUSD()
     {
-        return $this->IsUSD() ? $this->getShipping() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_SHIPPING_USD, "0");
+        return $this->IsUSD() ? $this->getShipping() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_SHIPPING_USD,
+            "0");
     }
 
     public function getInsuranceUSD()
     {
-        return $this->IsUSD() ? $this->getInsurance() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_INSURANCE_USD, "0");
+        return $this->IsUSD() ? $this->getInsurance() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_INSURANCE_USD,
+            "0");
     }
 
     public function getPriceUSD()
     {
-        return $this->IsUSD() ? $this->getPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_PRICE_USD, "0");
+        return $this->IsUSD() ? $this->getPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_PRICE_USD,
+            "0");
     }
 
     public function getTotalPriceUSD()
     {
-        return $this->IsUSD() ? $this->getTotalPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_TOTAL_USD, "0");
+        return $this->IsUSD() ? $this->getTotalPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_TOTAL_USD,
+            "0");
     }
 
     public function getGuidSkybox()
@@ -529,7 +558,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
     public function getBasePriceUSD()
     {
-        return $this->IsUSD() ? $this->getBasePrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_BASE_PRICE_USD, "0");
+        return $this->IsUSD() ? $this->getBasePrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_BASE_PRICE_USD,
+            "0");
     }
 
     public function getAdjustPrice()
@@ -539,7 +569,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
     public function getAdjustPriceUSD()
     {
-        return $this->IsUSD() ? $this->getAdjustPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_ADJUST_PRICE_USD, "0");
+        return $this->IsUSD() ? $this->getAdjustPrice() : $this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_PRODUCT_ADJUST_PRICE_USD,
+            "0");
     }
 
     public function getAdjustLabel()
@@ -577,8 +608,8 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
             case 'simple':
                 $finalPrice = isset($finalPrice) ? $finalPrice : $product->getFinalPrice();
                 $category_id = $product->getSkyboxCategoryId();
-                $category_id = isset($category_id) ? $product->getSkyboxCategoryId() : 0;
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $category_id = isset($category_id) ? $category_id : $this->getCommodityFromCategory($product);
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
 
                 $_data = array(
                     'object_id' => $product->getId(),
@@ -586,7 +617,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                     'sku' => $product->getSku(),
                     'category_id' => $category_id,
                     'final_price' => $finalPrice,
-                    'weight' => ($product->getWeight())?$product->getWeight():1,
+                    'weight' => ($product->getWeight()) ? $product->getWeight() : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -626,8 +657,10 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                         $stickWithinParent = $candidate->getParentProductId() ? $parentItem : null;
                         $candidate->setStickWithinParent($stickWithinParent);
 
-                        $candidate_getFinalPrice = $candidate->getPriceModel()->getFinalPrice($request->getQty(), $product);
-                        Mage::log("CalculatePrice candidate getFinalPrice: " . $candidate_getFinalPrice, null, 'skyboxcheckout.log', false);
+                        $candidate_getFinalPrice = $candidate->getPriceModel()->getFinalPrice($request->getQty(),
+                            $product);
+                        Mage::log("CalculatePrice candidate getFinalPrice: " . $candidate_getFinalPrice, null,
+                            'skyboxcheckout.log', false);
 
                         $_finalPrice = $_finalPrice + $candidate_getFinalPrice;
                         if ($_finalPrice) {
@@ -638,15 +671,19 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                     Mage::log("CalculatePrice candidate FIN", null, 'skyboxcheckout.log', false);
                 }
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $category_id = $product->getSkyboxCategoryId();
+                $category_id = isset($category_id) ? $category_id : $this->getCommodityFromCategory($product);
+
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
+
                 $_data = array(
                     'object_id' => $product->getId(),
                     'name' => $product->getName(),
                     //'sku' => $product->getSku(),
                     'sku' => $sku,
-                    'category_id' => $product->getSkyboxCategoryId(),
+                    'category_id' => $category_id,
                     'final_price' => $finalPrice,
-                    'weight' => $weight?$weight:1,
+                    'weight' => $weight ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -701,14 +738,14 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 //Mage::log("weight: " . $weight, null, 'cart.log', true);
                 //Mage::log("sku: " . $sku, null, 'cart.log', true);
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
                 $_data = array(
                     'object_id' => $product->getId(),
                     'name' => $product->getName(),
                     'sku' => $sku,
                     'category_id' => $product->getSkyboxCategoryId(),
                     'final_price' => $finalPrice,
-                    'weight' => ($weight)?$weight:1,
+                    'weight' => ($weight) ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -761,14 +798,14 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 Mage::log("weight: " . $weight, null, 'cart.log', true);
                 Mage::log("sku: " . $sku, null, 'cart.log', true);*/
 
-                $volWeight = !empty(trim($product->getDimensionalWeight()))?$product->getDimensionalWeight():0;
+                $volWeight = !empty(trim($product->getDimensionalWeight())) ? $product->getDimensionalWeight() : 0;
                 $_data = array(
                     'object_id' => $product->getId(),
                     'name' => $product->getName(),
                     'sku' => $sku,
                     'category_id' => $skyboxCategoryId,
                     'final_price' => $finalPrice,
-                    'weight' => ($weight)?$weight:1,
+                    'weight' => ($weight) ? $weight : 1,
                     'image_url' => $product->getImageUrl(),
                     'typeProduct' => $type,
                     'VolWeight' => $volWeight,
@@ -779,16 +816,17 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
                 break;
 
             default:
-                Mage::log("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice", null, 'skyboxcheckout.log', false);
+                Mage::log("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice",
+                    null, 'skyboxcheckout.log', false);
                 trigger_error("CalculatePrice:: Product Type (" . $type . ") is invalid or not supported at SkyboxCheckout CalculatePrice");
                 $defaultSwitch = true;
                 break;
         }
 
-        if(!$defaultSwitch){
+        if (!$defaultSwitch) {
             //Mage::log(print_r('EnableTax: ', true), null, 'tracer.log', true);
             //Mage::log(print_r($this->getEnabledAddSumTaxToPrice(), true), null, 'tracer.log', true);
-            if($this->getEnabledAddSumTaxToPrice()) {
+            if ($this->getEnabledAddSumTaxToPrice()) {
                 $store = Mage::app()->getStore('default');
                 $taxCalculation = Mage::getModel('tax/calculation');
                 $request = $taxCalculation->getRateRequest(null, null, null, $store);
@@ -814,7 +852,12 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
 
             //Mage::log(print_r('####################### Data produc params #######################', true), null, 'tracer.log', true);
             //Mage::log(print_r($_data, true), null, 'tracer.log', true);
-            $this->_calculatePrice($_data);
+            try {
+                $this->_calculatePrice($_data);
+            } catch (\Exception $e) {
+                Mage::log($e->getMessage(), null, 'skyboxcheckout.log', false);
+            }
+
         }
 
         Mage::log("Product Class: " . get_class($product), null, 'skyboxcheckout.log', false);
@@ -828,6 +871,40 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
         $apiData = $this->_api;
         var_dump($apiData); exit;*/
         return $data;
+    }
+
+    /**
+     * Return the Commodity from Category or Root
+     *
+     * @param $product
+     * @return int
+     */
+    public function getCommodityFromCategory($product)
+    {
+        $result = 0;
+
+        try {
+            $categoryIds = $product->getCategoryIds();
+
+            if (count($categoryIds)) {
+                $categoryId = $categoryIds[0];
+                $category = Mage::getModel('catalog/category')->load($categoryId);
+                $result = $category->getSkyboxCategoryIdSelect();
+            }
+
+            if (empty($result)) {
+                $categoryId = Mage::app()->getStore()->getRootCategoryId();
+                $category = Mage::getModel('catalog/category')->load($categoryId);
+                $result = $category->getSkyboxCategoryIdSelect();
+            }
+
+            $result = isset($result) ? $result : 0;
+
+        } catch (\Exception $e) {
+            \error_log("catch exception product_: " . $product . PHP_EOL, 3, BP . '/var/log/magento19.trace.log');
+        }
+
+        return $result;
     }
 
     private function _callServiceSky($data)
@@ -849,7 +926,7 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
             'category' => $data['category_id'],
             'price' => $data['final_price'],
             //'storeproductprice' => $product->getFinalPrice(),
-            'weight' => ($data['weight'])?$data['weight']:1,
+            'weight' => ($data['weight']) ? $data['weight'] : 1,
             'weightunit' => $this->getWeightUnit(),
             'imgurl' => $data['image_url'],
             /*'volweight' => $data['VolWeight'],

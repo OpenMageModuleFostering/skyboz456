@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Skybox_Checkout>
-            <version>0.1.0</version>
+            <version>1.2.10</version>
             <codePool>community</codePool>
         </Skybox_Checkout>
     </modules>
@@ -160,6 +160,11 @@
                     <cart>Skybox_Checkout_Model_Cart</cart>
                 </rewrite>
             </checkout>
+            <sales>
+                <rewrite>
+                    <quote_item>Skybox_Checkout_Model_Quote_Item</quote_item>
+                </rewrite>
+            </sales>
         </models>
         <blocks>
             <skyboxcheckout>
@@ -216,6 +221,15 @@
             </skyboxcheckout_setup>
         </resources>
         <events>
+            <payment_method_is_active>
+                <observers>
+                    <paymentfilter_payment_method_is_active>
+                        <type>singleton</type>
+                        <class>Skybox_Checkout_Model_Observer</class>
+                        <method>paymentMethodIsActive</method>
+                    </paymentfilter_payment_method_is_active>
+                </observers>
+            </payment_method_is_active>
             <!--controller_front_init_routers>
               <observers>
                 <Skybox_checkout_model_observer>
@@ -243,6 +257,14 @@
                   </skyboxcheckout_removetax_observer>
               </observers>
             </sales_quote_collect_totals_before-->
+            <sales_quote_collect_totals_before>
+              <observers>
+                  <frontend_shipping_rates_sales_quote_collect_totals_before>
+                      <class>Skybox_Checkout_Model_Observer</class>
+                      <method>hideShippingMethod</method>
+                  </frontend_shipping_rates_sales_quote_collect_totals_before>
+              </observers>
+            </sales_quote_collect_totals_before>
         </events>
         <!--rewrite>
           <skybox_checkout_cart>
@@ -317,36 +339,36 @@
                     </checkout_total_rmt1>
                 </totals>
             </quote>
-            <order_invoice>
-                <totals>
-                    <checkout_total1>
-                        <class>skyboxcheckout/invoice_total</class>
-                        <after>subtotal,discount,shipping</after>
-                        <before>tax,grand_total</before>
-                    </checkout_total1>
-                    <!--Eliminar-->
-                    <!--<skybox_insurance>
-                        <class>skyboxcheckout/total_screen_invoice</class>
-                        <after>subtotal</after>
-                        <before>tax</before>
-                    </skybox_insurance>-->
-                </totals>
-            </order_invoice>         
-            <order_creditmemo>
-                <totals>
-                    <checkout_total1>
-                        <class>skyboxcheckout/creditmemo_total</class>
-                        <after>subtotal,discount,shipping</after>
-                        <before>tax,grand_total</before>
-                    </checkout_total1>
-                    <!--Eliminar-->
-                    <!--<skybox_insurance>
-                        <class>skyboxcheckout/total_screen_creditmemo</class>
-                        <after>subtotal</after>
-                        <before>tax</before>
-                    </skybox_insurance>-->
-                </totals>
-            </order_creditmemo>
+            <!--<order_invoice>-->
+                <!--<totals>-->
+                    <!--<checkout_total1>-->
+                        <!--<class>skyboxcheckout/invoice_total</class>-->
+                        <!--<after>subtotal,discount,shipping</after>-->
+                        <!--<before>tax,grand_total</before>-->
+                    <!--</checkout_total1>-->
+                    <!--&lt;!&ndash;Eliminar&ndash;&gt;-->
+                    <!--&lt;!&ndash;<skybox_insurance>-->
+                        <!--<class>skyboxcheckout/total_screen_invoice</class>-->
+                        <!--<after>subtotal</after>-->
+                        <!--<before>tax</before>-->
+                    <!--</skybox_insurance>&ndash;&gt;-->
+                <!--</totals>-->
+            <!--</order_invoice>         -->
+            <!--<order_creditmemo>-->
+                <!--<totals>-->
+                    <!--<checkout_total1>-->
+                        <!--<class>skyboxcheckout/creditmemo_total</class>-->
+                        <!--<after>subtotal,discount,shipping</after>-->
+                        <!--<before>tax,grand_total</before>-->
+                    <!--</checkout_total1>-->
+                    <!--&lt;!&ndash;Eliminar&ndash;&gt;-->
+                    <!--&lt;!&ndash;<skybox_insurance>-->
+                        <!--<class>skyboxcheckout/total_screen_creditmemo</class>-->
+                        <!--<after>subtotal</after>-->
+                        <!--<before>tax</before>-->
+                    <!--</skybox_insurance>&ndash;&gt;-->
+                <!--</totals>-->
+            <!--</order_creditmemo>-->
         </sales>
         <!--routers>
           <checkout>

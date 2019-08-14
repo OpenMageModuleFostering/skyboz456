@@ -1,7 +1,8 @@
+<?xml version="1.0"?>
 <config>
 	<modules>
 		<Skybox_International>
-			<version>0.1.0</version>
+			<version>1.2.10</version>
 			<codePool>community</codePool>
 		</Skybox_International>
 	</modules>

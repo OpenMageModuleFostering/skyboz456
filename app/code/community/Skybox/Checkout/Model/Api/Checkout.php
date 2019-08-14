@@ -46,8 +46,26 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
             'customerlanguages' => $this->_getConfig()->getLanguage()
         );
 
-        $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+        //$response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+        /**
+         * only one time for call to service start
+         */
+        $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
+        $callToSkyBox = $session->getData("callToSkyBox");
 
+        //Mage::log($callToSkyBox, null, 'local.log', true);
+        $initialize = $this->_getConfig()->getSession()->getCartSkybox();
+        if (!empty($initialize) && (!$callToSkyBox)) {
+            $response = $initialize;
+        } else {
+            $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+            $session->setData("callToSkyBox", false);
+        }
+//        $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+//        $session->setData("callToSkyBox", false);
+        /**
+         * only one time for call to service end
+         */
         // Set SkyboxUser session
         $this->_getConfig()->getSession()->setSkyboxUser($response);
 
@@ -160,10 +178,6 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
             return $this->_getConfig()->getSession()->getCartSkybox();
         }
         return "";
-    }
-
-    public function getStoreCode() {
-        return 77;
     }
 
     /*

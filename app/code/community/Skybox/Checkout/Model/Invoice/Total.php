@@ -2,7 +2,7 @@
 
 class Skybox_Checkout_Model_Invoice_Total extends Mage_Sales_Model_Order_Invoice_Total_Abstract
 {
-    public function collect(Mage_Sales_Model_Order_Creditmemo $invoice)
+    public function collect($invoice)
     {
 
         /*Mage::log("==============================ini", null, 'invoice.log', true); 

@@ -40,6 +40,11 @@ class Skybox_International_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxemail', Mage::app()->getStore());
     }
 
+    public function getSkyboxIntegration()
+    {
+        return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxintegration', Mage::app()->getStore());
+    }
+
     public function getSkyboxUrlAPI()
     {
         return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxurlapi', Mage::app()->getStore());
@@ -64,5 +69,10 @@ class Skybox_International_Helper_Data extends Mage_Core_Helper_Abstract
     public function getCartId()
     {
         return Mage::getSingleton('checkout/session')->getQuoteId();
+    }
+
+    public function getCssVersion()
+    {
+        return Mage::getModel('skyboxcatalog/api_product')->getCssVersion();
     }
 }

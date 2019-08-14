@@ -78,11 +78,23 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </skyboxemail>
+                        <skyboxintegration translate="label">
+                            <label>SkyBox Itegration:</label>
+                            <comment>SkyBox Integration</comment>
+                            <frontend_type>select</frontend_type>
+                            <!--<source_model>adminhtml/system_config_source_yesno</source_model>-->
+                            <source_model>Skybox_International_Model_StoreType</source_model>
+                            <!--<frontend_type>text</frontend_type>-->
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxintegration>
                         <skyboxurlapi translate="label">
                             <label>SkyBox Url API:</label>
                             <comment>Url API By Skybox Checkout International</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>7</sort_order>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -91,7 +103,7 @@
                             <label>SkyBox Url Client:</label>
                             <comment>Url Client By Skybox Checkout International</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>8</sort_order>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

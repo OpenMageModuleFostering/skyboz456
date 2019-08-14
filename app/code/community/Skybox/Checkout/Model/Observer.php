@@ -5,7 +5,7 @@
  *
  * @category    Skybox
  * @package     Skybox_Checkout
- * @copyright   Copyright (c) 2014 Skybox Checkout. (http://www.skyboxcheckout.com)
+ * @copyright   Copyright (c) 2014 - 2017 Skybox Checkout. (http://www.skyboxcheckout.com)
  */
 class Skybox_Checkout_Model_Observer
 {
@@ -19,8 +19,9 @@ class Skybox_Checkout_Model_Observer
 
     protected function _getApi()
     {
-        if (null === $this->_api)
+        if (null === $this->_api) {
             $this->_api = Mage::getModel($this->_typeApi);
+        }
 
         return $this->_api;
     }
@@ -31,13 +32,15 @@ class Skybox_Checkout_Model_Observer
 
     protected function _getProduct()
     {
-        if (null === $this->_product)
+        if (null === $this->_product) {
             $this->_product = Mage::getModel($this->_typeProduct);
+        }
 
         return $this->_product;
     }
 
-    private function isEnable() {
+    private function isEnable()
+    {
         if ($this->_enable === null) {
 //            $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
             $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
@@ -58,7 +61,7 @@ class Skybox_Checkout_Model_Observer
 
     public function RemoveTax(Varien_Event_Observer $observer)
     {
-        if(!$this->isEnable()) {
+        if (!$this->isEnable()) {
             return;
         }
 
@@ -66,11 +69,11 @@ class Skybox_Checkout_Model_Observer
         $customer_id = Mage::getSingleton('customer/session')->getId();
         $customer = Mage::getModel("customer/customer")->load($customer_id);
 
-        if($customer->getIsTaxExempt() == 1)
-        {
+        if ($customer->getIsTaxExempt() == 1) {
             $items = $observer->getEvent()->getQuote()->getAllVisibleItems();
-            foreach($items as $item)
+            foreach ($items as $item) {
                 $item->getProduct()->setTaxClassId(0);
+            }
             Mage::log('RemoveTax->Tax', null, 'SkyObserver.log', true);
         }
         Mage::log('RemoveTax->fin', null, 'SkyObserver.log', true);
@@ -78,10 +81,10 @@ class Skybox_Checkout_Model_Observer
 
     public function CalculatePriceQuoteItem(Varien_Event_Observer $observer)
     {
-        if(!$this->isEnable()) {
+        if (!$this->isEnable()) {
             return $this;
         }
-        Mage::log('Observer->CalculatePriceQuoteItem->ini', null, 'cart.log', true);
+//        Mage::log('Observer->CalculatePriceQuoteItem->ini', null, 'cart.log', true);
 
         $event = $observer->getEvent();
         $quote_item = $event->getQuoteItem();
@@ -104,7 +107,7 @@ class Skybox_Checkout_Model_Observer
         }*/
 
         return $this;
-        
+
         //$product = $quote_item->getProduct();
 
         /*$quote = Mage::getSingleton('checkout/session');
@@ -163,102 +166,163 @@ class Skybox_Checkout_Model_Observer
 
     public function changeQuoteAddressSkybox(Varien_Event_Observer $observer)
     {
-        if(!$this->isEnable()) {
+        /**
+         * only one time for call to service start - Active
+         * This always run when you do alter to product as change/delete product
+         */
+        //$session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
+        //$session->setData("callToSkyBox", true);
+
+        /**
+         * only one time for call to service end - Active
+         */
+
+        if (!$this->isEnable()) {
             return $this;
         }
-        if($this->_getApi()->getLocationAllow()){
-            Mage::log('Observer->changeQuoteAddressSkybox : ini', null, 'TotalSales.log', true);
-            /* $quote Mage_Sales_Model_Quote */
-            $quote = $observer->getEvent()->getQuote();
 
-            /* $address Mage_Sales_Model_Quote_Address */
-            $address = $quote->getShippingAddress();
+        /**
+         * Integration 3 start, show price shop in cart*
+         */
+        $allowRunByIntegration3 = true;
+        //$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
+        $typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
+        if ($typeIntegration == 3) {
+            $allowRunByIntegration3 = false;
+        }
+        //Mage::log("Call true22: changeQuoteAddressSkybox", null, 'local.log', true);
+        /**
+         * Integration 3 end, show price shop in cart*
+         */
+        if ($allowRunByIntegration3) {
+            if ($this->_getApi()->getLocationAllow()) {
+                Mage::log('Observer->changeQuoteAddressSkybox : ini', null, 'TotalSales.log', true);
+                /* $quote Mage_Sales_Model_Quote */
+                $quote = $observer->getEvent()->getQuote();
 
-            $totals = 0;
-            $baseTotals = 0;
-            $totalTax=0;
+                /* $address Mage_Sales_Model_Quote_Address */
+                $address = $quote->getShippingAddress();
 
-            foreach ($quote->getAllItems() as $item) {
+                $totals = 0;
+                $baseTotals = 0;
+                $totalTax = 0;
+
+                foreach ($quote->getAllItems() as $item) {
+
+                    //Estas lineas se agregaron para elimnar el Tax del Carrito
+                    /*$item->setTaxPercent(0);
+                    $item->setTaxAmount(0);
+                    $item->setBaseTaxAmount(0);
+
+                    $item->setPriceInclTax($item->getPrice());
+                    $item->setBasePriceInclTax($item->getBasePrice());
+                    $item->setBaseRowTotalInclTax($item->setBaseRowTotal());*/
+                    //------------------------------------------------------------>
+
+                    Mage::log('Observer->changeQuoteAddressSkybox->Item->getRowTotalSkybox->' . $item->getRowTotalSkybox(),
+                        null, 'TotalSales.log', true);
+
+                    $totals += $item->getRowTotalSkybox();
+                }
+
+                $quote->save();
+
+                $baseTotals = $totals;
+
+                //$totalTax1= $address->getTaxAmount();
 
                 //Estas lineas se agregaron para elimnar el Tax del Carrito
-                /*$item->setTaxPercent(0);
-                $item->setTaxAmount(0);
-                $item->setBaseTaxAmount(0);
+                $address->setTaxAmount(0);
+                $address->setBaseTaxAmount(0);
 
-                $item->setPriceInclTax($item->getPrice());
-                $item->setBasePriceInclTax($item->getBasePrice());
-                $item->setBaseRowTotalInclTax($item->setBaseRowTotal());*/
+                $applied_taxes = array();
+
+                $address->setAppliedTaxes($applied_taxes);
                 //------------------------------------------------------------>
 
-                Mage::log('Observer->changeQuoteAddressSkybox->Item->getRowTotalSkybox->' . $item->getRowTotalSkybox(), null, 'TotalSales.log', true);
+                //$address->save();
 
-                $totals += $item->getRowTotalSkybox();
+                //$totales = $address->getTotalAmount("checkout_total1");
+
+                //$tamanio = count($totales);
+                //for ($x=0;$x<$tamanio; $x++) Mage::log('Observer->changeQuoteAddressSkybox->total->' . $totales[$x], null, 'TotalSales.log', true);
+
+                //Mage::log('Observer->changeQuoteAddressSkybox->totales->' . var_dump($totales["subtotal"]), null, 'TotalSales.log', true);
+                //Mage::log('Observer->changeQuoteAddressSkybox->totales->' . $totales, null, 'TotalSales.log', true);
+
+                $totalTax = 0; //$address->getTaxAmount(); //Comentado
+
+                //Recorremos los conceptos agrupados (esto debe modificarse no es lo optimo)
+                /*$conceptsSkybox = json_decode($address->getConceptsSkybox());
+                foreach ($conceptsSkybox as $concept) {
+                    $totalTax = $totalTax + $concept->Value;
+                }*/
+
+                $totalRmt = 0;
+                //Recorremos los conceptos agrupados (esto debe modificarse no es lo optimo)
+                /*$rmtSkybox = json_decode($address->getRmtSkybox());
+                foreach ($rmtSkybox as $rmt) {
+                    $totalRmt = $totalRmt + $rmt->Value;
+                }*/
+
+                //Mage::log('Observer->changeQuoteAddressSkybox->totalTax1->' . $totalTax1 . ' &totalbase->' . $baseTotals, null, 'TotalSales.log', true);
+                //Mage::log('Observer->changeQuoteAddressSkybox->totalTax->' . $totalTax . ' &totalbase->' . $baseTotals, null, 'TotalSales.log', true);
+
+                /*$address->setSubtotalSkybox($totals);
+                $address->setBaseSubtotalSkybox($baseTotals);
+                $address->setGrandTotalSkybox($totals+$totalTax);
+                $address->setBaseGrandTotalSkybox($baseTotals+$totalTax);*/
+
+                $baseTotals = $address->getBaseGrandTotalSkybox();
+                $totals = $address->getGrandTotalSkybox();
+
+                $address->setPriceInclTax($totals);
+                $address->setBasePriceInclTax($baseTotals);
+
+                $totals = floatval(preg_replace("/[^-0-9\.]/", "", $totals));
+                //$address->setGrandTotal($totals+$totalTax);
+                $address->setGrandTotal($totals + $totalTax);
+                $address->setBaseGrandTotal($baseTotals + $totalTax);
+
+                //$address->save();
+
+                Mage::log('Observer->changeQuoteAddressSkybox : fin', null, 'TotalSales.log', true);
+
+                return $this;
             }
-
-            $quote->save();
-
-            $baseTotals = $totals;
-
-            //$totalTax1= $address->getTaxAmount();
-
-            //Estas lineas se agregaron para elimnar el Tax del Carrito
-             $address->setTaxAmount(0);
-             $address->setBaseTaxAmount(0);
-
-            $applied_taxes = array();
-
-            $address->setAppliedTaxes($applied_taxes);       
-            //------------------------------------------------------------>
-
-            //$address->save();
-
-            //$totales = $address->getTotalAmount("checkout_total1");
-
-            //$tamanio = count($totales);
-            //for ($x=0;$x<$tamanio; $x++) Mage::log('Observer->changeQuoteAddressSkybox->total->' . $totales[$x], null, 'TotalSales.log', true);
-
-            //Mage::log('Observer->changeQuoteAddressSkybox->totales->' . var_dump($totales["subtotal"]), null, 'TotalSales.log', true);
-            //Mage::log('Observer->changeQuoteAddressSkybox->totales->' . $totales, null, 'TotalSales.log', true);
-
-            $totalTax = 0; //$address->getTaxAmount(); //Comentado
-
-            //Recorremos los conceptos agrupados (esto debe modificarse no es lo optimo)
-            /*$conceptsSkybox = json_decode($address->getConceptsSkybox());
-            foreach ($conceptsSkybox as $concept) {
-                $totalTax = $totalTax + $concept->Value;
-            }*/
-
-            $totalRmt = 0;
-            //Recorremos los conceptos agrupados (esto debe modificarse no es lo optimo)
-            /*$rmtSkybox = json_decode($address->getRmtSkybox());
-            foreach ($rmtSkybox as $rmt) {
-                $totalRmt = $totalRmt + $rmt->Value;
-            }*/
-
-            //Mage::log('Observer->changeQuoteAddressSkybox->totalTax1->' . $totalTax1 . ' &totalbase->' . $baseTotals, null, 'TotalSales.log', true);
-            //Mage::log('Observer->changeQuoteAddressSkybox->totalTax->' . $totalTax . ' &totalbase->' . $baseTotals, null, 'TotalSales.log', true);
-
-            /*$address->setSubtotalSkybox($totals);
-            $address->setBaseSubtotalSkybox($baseTotals);
-            $address->setGrandTotalSkybox($totals+$totalTax);
-            $address->setBaseGrandTotalSkybox($baseTotals+$totalTax);*/
-
-            $baseTotals = $address->getBaseGrandTotalSkybox();
-            $totals = $address->getGrandTotalSkybox();
-
-            $address->setPriceInclTax($totals);
-            $address->setBasePriceInclTax($baseTotals);
-
-            $totals =  floatval(preg_replace("/[^-0-9\.]/","",$totals));
-            //$address->setGrandTotal($totals+$totalTax);
-            $address->setGrandTotal($totals+$totalTax);
-            $address->setBaseGrandTotal($baseTotals+$totalTax);
-
-            //$address->save();
-
-            Mage::log('Observer->changeQuoteAddressSkybox : fin', null, 'TotalSales.log', true);
-
             return $this;
         }
+
+    }
+
+    /**
+     * Hide Skybox Shipping Method
+     * @param Varien_Event_Observer $observer
+     */
+    public function hideShippingMethod(Varien_Event_Observer $observer)
+    {
+        if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_FRONTEND) {
+            $quote = $observer->getEvent()->getQuote();
+            $store = Mage::app()->getStore($quote->getStoreId());
+            $carriers = Mage::getStoreConfig('carriers', $store);
+
+            $hiddenMethodCode = 'skyboxcheckout_shipping';
+
+            foreach ($carriers as $carrierCode => $carrierConfig) {
+                if ($carrierCode == $hiddenMethodCode) {
+                    $store->setConfig("carriers/{$carrierCode}/active", '0');
+                }
+            }
+        }
+    }
+
+    public function paymentMethodIsActive(Varien_Event_Observer $observer)
+    {
+        $event = $observer->getEvent();
+        $result = $event->getResult();
+
+        $allowHelper = Mage::helper('skyboxcore/allow');
+        $result->isAvailable = ($allowHelper->isPriceEnabled()) ? false : true ;
+
     }
 }
