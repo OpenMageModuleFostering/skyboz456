@@ -21,8 +21,7 @@
             return {
                 cartDataURL: CART_DATA_URL_SKYBOX,
                 IsRegistrationDisabled: IS_REGISTRATION_DISABLED_SKYBOX,
-                currentUri: window.location.href,
-                forceReload: SKYBOX_FORCE_RELOAD,
+                currentUri: window.location.href
             };
         },
         load: function () {

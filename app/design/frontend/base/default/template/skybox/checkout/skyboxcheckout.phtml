@@ -1,358 +1,222 @@
 <?php
+/** @var Skybox_International_Helper_Data $_helper */
 $_helper = Mage::helper('skyboxinternational/data');
 
-$_model = Mage::getModel('skyboxcore/standard');
+if ($_helper->getActive()) {
 
-/** @var Skybox_Core_Model_Config $_config */
-$_config = Mage::getModel('skyboxcore/config');
+    /** @var Skybox_Core_Model_Config $_config */
+    $_config = Mage::getModel('skyboxcore/config');
 
-/** @var Skybox_Checkout_Model_Api_Checkout $_checkout */
-$_checkout = Mage::getModel('skyboxcheckout/api_checkout');
+    /** @var Skybox_Checkout_Model_Api_Checkout $_checkout */
+    $_checkout = Mage::getModel('skyboxcheckout/api_checkout');
 
-/** @var Skybox_Core_Helper_Allow $allowHelper */
-$allowHelper = Mage::helper('skyboxcore/allow');
+    /** @var Skybox_Core_Helper_Allow $allowHelper */
+    $allowHelper = Mage::helper('skyboxcore/allow');
 
-$isCartEnabled = $allowHelper->isCartBarEnabled();
+    $_cartDataURL = "";
+    $_merchant = $_helper->getMerchantCode();
+    $template = "";
+    $cartId = $_helper->getCartId();
+    $cssVersion = $_helper->getCssVersion();
 
-$_cartDataURL = "";
-$_merchant = $_helper->getMerchantCode();
-$template = "";
-$cartId = $_helper->getCartId();
+    $_checkout->InitializeBarSkybox();
 
-Mage::log("InitializeBarSkybox ", null, 'skyboxcheckout.log', true);
-$_checkout->InitializeBarSkybox();
+    $change_country = false;
 
-$change_country = false;
-$request = $this->getRequest();
-$module = $request->getModuleName();
-$controller = $request->getControllerName();
-$action = $request->getActionName();
-$getHomeUrl = Mage::helper('core/url')->getHomeUrl();
-$_url_check_cart = Mage::getUrl("checkout/cart");
+//    $request = $this->getRequest();
+//    $module = $request->getModuleName();
+//    $controller = $request->getControllerName();
+//    $action = $request->getActionName();
+    $getHomeUrl = Mage::helper('core/url')->getHomeUrl();
+    $urlCheckCart = Mage::getUrl("checkout/cart");
 
-$cart = $_config->getSession()->getCartSkybox();
-/**
- * Start Aditional we add a line debug with integration information
- */
-echo '<script>
-            console.log("LocationAllowService: ' . $_checkout->getLocationAllow() . ' ");
-      </script>';
-/**
- * End Aditional we add a line debug with integration information
- */
-//$template = "<a href='#' id='link_choise_country'>&nbsp;</a>";
-// Load CSS & JS
-$skybox_url = $_helper->getSkyboxUrlMain();// $_config->skyboxDefaultUrl;
-$api_css_button_international = $skybox_url . 'widgets/api-button/css/api-button-international-css.ashx';
-$api_css_button_international .= '?s=' . $_helper->getMerchantCode();
-$api_css_button_international .= '&CssVersion=' . $_helper->getCssVersion();
-$api_js_button_international = $skybox_url . 'Content/debug/API/js/api-button-tooltip.js';
-
-if ($allowHelper->isCartBarEnabled()) :
-    $template = '';
     $cart = $_config->getSession()->getCartSkybox();
-    if (!empty($cart)) :
-        $template = $cart->BarHtmlTemplate;
-        foreach ($cart as $key => $value) :
-            $template = str_replace('{' . $key . '}', $value, $template);
-        endforeach;
+
+    // Load CSS & JS
+    $skybox_url = $_helper->getSkyboxUrlMain();// $_config->skyboxDefaultUrl;
+    $api_css_button_international = $skybox_url . 'widgets/api-button/css/api-button-international-css.ashx';
+    $api_css_button_international .= '?s=' . $_merchant;
+    $api_css_button_international .= '&CssVersion=' . $cssVersion;
+    $api_js_button_international = $skybox_url . 'Content/debug/API/js/api-button-tooltip.js';
+    $countryChange = 0;
+
+    if ($allowHelper->isCartBarEnabled()) :
+        $countryChange = 1;
+        $template = '';
+//        $cart = $_config->getSession()->getCartSkybox();
+        if (!empty($cart)) :
+            $template = $cart->BarHtmlTemplate;
+            foreach ($cart as $key => $value) :
+                $template = str_ireplace('{' . $key . '}', $value, $template);
+            endforeach;
+        endif;
+        $_cartDataURL = $cart->CartDataURL;
+        echo $template;
     endif;
-    $_cartDataURL = $cart->CartDataURL;
-    echo $template;
-endif;
-?>
-<link rel="stylesheet" type="text/css" href="<?php echo $api_css_button_international; ?>"/>
-<link rel="stylesheet" type="text/css" href="<?php echo $this->getSkinUrl('css/skybox/style.css?v=' . $_helper->getCssVersion()); ?>"/>
-<!--    <link rel="stylesheet" type="text/css" href="--><?php #echo $this->getSkinUrl('css/skybox/style.css?v=230120171122');?><!--"/>-->
-<script type="text/javascript">
-    var URL_CHECK_CART  = "<?php echo $_url_check_cart ?>";
-    var CART_ID         = "<?php echo $cartId ?>";
-    var CART_DATA_URL   = "<?php echo $_cartDataURL ?>";
-    var MERCHANT        = "<?php echo $_merchant ?>";
-    var SKYBOX_URL      = "<?php echo $skybox_url ?>";
-    var CHANGE_COUNTRY  = "<?php echo $change_country ?>";
-    var ACTUAL_URI      = "<?php echo 'http://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'] ?>";
-    var GET_HOME_URL    = "<?php echo $getHomeUrl ?>";
-    jQuery(document).ready(function() {
-        jQuery(".skybox-price-set").each(function( index ) {
-            <?php
-            $skyBoxUrlClientBase= $_helper->getSkyBoxUrlAPI();
-            $codeShop           = Mage::getModel('skyboxcatalog/api_product')->getStoreCode();
-            $skyBoxUrlClientGet = str_replace("apirest/", "", $skyBoxUrlClientBase);
-            $skyBoxUrlClient    = $skyBoxUrlClientGet . "multiplecalculate/" . $codeShop . "/calc-";
-            ?>
-            var SkyBoxUrlClient = "<?php echo $skyBoxUrlClient;?>";
-            var dataId = jQuery(this).attr("id");
-            var id = jQuery(this).attr("product-id");
-            var url = SkyBoxUrlClient + id + ".html";
-            var content = jQuery.get(url, function (data) {
-                jQuery("#" + dataId).html(data);
-            });
-        });
-    });
 
-    (function ($) {
+    if ($allowHelper->isChangeCountryEnabled()):
+//        $cart = $_config->getSession()->getCartSkybox();
+        $template = "<div class='main-container' style='padding: 10px 0 0;text-align: right;'>";
+        $template .= "<div class='change_country'>";
+        $template .= "<a class='skx_position_option_country' href='javascript:;'>Change country</a>";
+        $template .= "</div>";
+        $template .= "</div>";
+        $change_country = true;
+        $countryChange = 0;
+        $_cartDataURL = $cart->CartDataURL;
+        echo $template;
+    endif;
 
-        var widthPage = 0;
-        var heightPage = 0;
-        var popup = {};
-        var popupWidth = 540;
-        var popupHeight = 545;
-        var win = '';
+    if ($allowHelper->isPriceEnabled()) {
+        $productConfigurable = $this->getSkinUrl('js/skybox/catalog.product.configurable.js');
+        echo '<script type="text/javascript" src="' . $productConfigurable . '"></script>';
+    }
 
-        function showPopup(name, t, url, w, h) {
-            //winCompare = new Window('popup', {className: 'alphacube', title: t, url: url, width: w, height: h, minimizable: false, maximizable: false, showEffectOptions: {duration: 0.4}, hideEffectOptions: {duration: 0.4} });
-            winCompare = new Window(name, {
-                className: 'alphacube',
-                title: t,
-                url: url,
-                width: w,
-                height: h,
-                minimizable: false,
-                maximizable: false,
-                showEffectOptions: {duration: 0.4},
-                hideEffectOptions: {duration: 0.4},
-                destroyOnClose: true,
-                draggable: false,
-                resizable: false
-            });
+    $skyBoxUrlClientBase = $_helper->getSkyBoxUrlAPI();
+    $storeCode = Mage::getModel('skyboxcatalog/api_product')->getStoreCode();
+    $skyBoxUrlClientGet = str_ireplace("apirest/", "", $skyBoxUrlClientBase);
+    $skyBoxUrlClient = $skyBoxUrlClientGet . "multiplecalculate/" . $storeCode . "/calc-";
+    ?>
 
-            winCompare.setDestroyOnClose();
-            winCompare.setZIndex(9999);
-            winCompare.showCenter(true);
-            return winCompare;
-        }
+    <link rel="stylesheet" type="text/css" href="<?php echo $api_css_button_international; ?>"/>
+    <link rel="stylesheet" type="text/css"
+          href="<?php echo $this->getSkinUrl('css/skybox/style.css?v=' . $cssVersion); ?>"/>
+    <script type="text/javascript">
+        var URL_CHECK_CART = "<?php echo $urlCheckCart ?>";
+        var CART_ID = "<?php echo $cartId ?>";
+        var CART_DATA_URL_SKYBOX = "<?php echo $_cartDataURL ?>";
+        var MERCHANT_ID_SKYBOX = "<?php echo $_merchant ?>";
+        var SKYBOX_URL = "<?php echo $skybox_url ?>";
+        var CHANGE_COUNTRY = "<?php echo $change_country ?>";
+        var ACTUAL_URI = "<?php echo 'http://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'] ?>";
+        var GET_HOME_URL = "<?php echo $getHomeUrl ?>";
+        var COUNTRY_CHANGE = "<?php echo $countryChange?>";
+        var IS_SKYBOX_VISIBLE = "<?php echo $_checkout->getLocationAllow(); ?>";
+        var URL_BASE_MAGENTO = "<?php echo Mage::getBaseUrl() ?>";
+        var IS_REGISTRATION_DISABLED_SKYBOX = 1;
+        var LOADING_IMAGE = "<?php echo $this->getSkinUrl('images/skybox/ajax-loading.gif')?>";
 
-        function goToCart() {
-            document.location = URL_CHECK_CART;
-        }
-
-        function goToInitializeSession() {
-            var idCart      = CART_ID;
-            var datos       = CART_DATA_URL;
-            var merchant    = MERCHANT;
-            var actualUri   = ACTUAL_URI + "?LoadFrame=1";
-            var url         = SKYBOX_URL + "WebForms/PublicSite/Tracking.aspx?" + datos + "&merchant=" + merchant + "&idCart=" + idCart + "&ReLoad=1&uri=" + actualUri;
-            var name        = 'initSession' + Date.now();
-            callAlphacube();
-            showPopup(name, '', url, (widthPage - 50 ), ((heightPage < 800) ? heightPage - 50 : 800));
-        }
-
-        function callAlphacube(){
-            var alphacube_ = document.querySelectorAll('.alphacube_close');
-            if(alphacube_.length > 0){
-                var overlay_ = document.getElementById("overlay_modal");
-
-                if(overlay_ !== null) overlay_.style.display = '';
-                var id_modal = (alphacube_[1]) ? alphacube_[1].parentNode.getAttribute('id') : '';
-                try{
-                    document.getElementById(id_modal).remove();
+        (function ($) {
+            $(document).ready(function () {
+                if (typeof $.fancybox !== "function") {
+                    var fileref = document.createElement("link");
+                    fileref.rel = "stylesheet";
+                    fileref.type = "text/css";
+                    fileref.href = "<?php echo $this->getSkinUrl('css/skybox/jquery.fancybox.css');?>";
+                    document.getElementsByTagName("head")[0].appendChild(fileref);
+                    $('head').append($('<script />').attr('src', '<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . 'js/skybox/jquery.fancybox.js'; ?>'));
                 }
-                catch(e) {
+                $(".skybox-price-set").each(function (index) {
+                    var SkyBoxUrlClient = "<?php echo $skyBoxUrlClient;?>";
+                    var dataId = $(this).attr("id");
+                    var id = $(this).attr("product-id");
+                    var url = SkyBoxUrlClient + id + ".html";
+                    var content = $.get(url, function (data) {
+                        $("#" + dataId).html(data);
+                    });
+                });
+            });
+        })(jQuery);
+    </script>
+    <script src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . 'js/skybox/main.js'; ?>"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        var SKYBOX_OPTIONS_PRICE_URL = '<?php echo Mage::getUrl("skbcheckout/calculate"); ?>';
+        //]]>
+    </script>
+    <script type="text/javascript" src="<?php echo $api_js_button_international; ?>"></script>
+    <script>
+        // @todo Fix more Change countries Block issue
+        setTimeout(function () {
+            jQuery("a[href='#'].skx-bar-other").attr('href', 'javascript:;');
+            var country_change = "<?php echo $countryChange?>";
+            if (parseInt(country_change) === 1) {
+                var currencyISO_ = document.getElementsByClassName('skx_banner_label_currencyISO');
+                if (currencyISO_.length > 1) {
+                    var nextSiblingOne = currencyISO_[0].nextElementSibling;
+                    var getAttrNextSiblingOne = nextSiblingOne.getAttribute('class');
+                    var nextSiblingLast = currencyISO_[1].nextElementSibling;
+                    nextSiblingLast.setAttribute('class', getAttrNextSiblingOne);
+                    currencyISO_[1].innerHTML = currencyISO_[0].innerHTML;
+                }
+            } else {
+                var optCountry = document.getElementsByClassName('skx_position_option_country');
+                if (optCountry.length > 1) {
+                    optCountry[1].innerHTML = optCountry[0].innerText;
+                    try {
+                        document.getElementById('l_checkout_view_account').style.display = 'none';
+                    } catch (e) {
 
+                    }
                 }
             }
-        }
+        }, 500);
+    </script>
+    <?php
+// }
+// /? />
 
-        function goToLocation() {
-            win = 'resync';
-            var datos = CART_DATA_URL;
-            var process_url = GET_HOME_URL + "skbcheckout/process";
-            var return_url = getReturnUrl();
-//            var return_url = document.URL;
-            var change_country_status = CHANGE_COUNTRY;
-            var url = SKYBOX_URL + "Webforms/PublicSite/ReSync.aspx?" + datos;
-            url += "&process_url=" + process_url;
-            url += "&return_url=" + return_url;
-            url += "&change_country=" + change_country_status;
+    $size = 0; // Calculate height
 
-            var _size = getSizeForPopup();
-            var name = 'selectLocation' + Date.now();
-            callAlphacube();
-            popup = showPopup(name, '', url, _size.width, _size.height);
-        }
+    if ($allowHelper->getLocationAllow()) {
 
-        function goToTrackingLocation() {
-            var url = SKYBOX_URL + "Webforms/PublicSite/Tracking.aspx?" + CART_DATA_URL + "&idCart=" + CART_ID;
-            var name = 'tracking' + Date.now();
-            showPopup(name, '', url, (widthPage - 50 ), ((heightPage < 800) ? heightPage - 50 : 800));
-        }
+        $UserTemporal = "1";
+        $cartItemCount = 0;
 
-        function loadIframe() {
-            var actualUri = ACTUAL_URI;
-            var flgLoadIframe = "<?php echo (isset($_GET['LoadFrame'])) ? $_GET['LoadFrame'] : 0; ?>";
-            if (flgLoadIframe === "1") {
-                if (actualUri.indexOf("skbcheckout/international") === -1) goToInitializeSession();
-            }
-        }
-
-        function postMessageIframe() {
-            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-            var eventer = window[eventMethod];
-            var messageEvent = eventMethod === "attachEvent" ? "onmessage" : "message";
-            eventer(messageEvent,function(e) {
-//                if(e.origin == 'https://www.skyboxcheckout.com'){
-                recalculateHeightIframe(e.data);
-//                }
-            },false);
-        }
-
-        function recalculateHeightIframe(data) {
-            if (data.win === 'resync') {
-                popupHeight = data.height;
-                var _size = getSizeForPopup();
-                try{
-                    popup.setSize(_size.width, _size.height);
-                }
-                catch (e) {
-//                    console.log("not calculate popup:::: ", e);
-                }
-//                popup.showCenter(true);
-            }
-        }
-
-        function browserResize() {
-            jQuery(window).resize(function() {
-                if(!jQuery.isEmptyObject(popup)){
-                    var _size = getSizeForPopup();
-                    popup.setSize(_size.width, _size.height)
-                }
-            });
-        }
-
-        function getSizeForPopup() {
-            var _width = jQuery(window).width();
-            var _height = jQuery(window).height();
-            _width  = (_width < popupWidth) ? _width - 30 : popupWidth ;
-            return {width: _width, height: popupHeight};
-        }
-
-        $(".skx_position_option_country").unbind().click(function () {
-            goToLocation();
-        });
-
-        $(".skx_banner_image_account").unbind().click(function () {
-            goToInitializeSession();
-        });
-
-        $(".skx_banner_image_car").unbind().click(function () {
-            goToCart();
-        });
-
-        $(".skx_banner_image_tracking").unbind().click(function () {
-            goToTrackingLocation();
-        });
-
-        $("#link_choise_country").unbind().click(function () {
-            goToCart();
-        });
-
-        $(document).ready(function () {
-            widthPage = $(window).width();
-            heightPage = $(window).height();
-            postMessageIframe();
-            loadIframe();
-            browserResize();
-        });
-    })(jQuery);
-</script>
-
-<script type="text/javascript">
-    //<![CDATA[
-    var SKYBOX_OPTIONS_PRICE_URL = '<?php echo Mage::getUrl(); ?>skbcheckout/calculate';
-    //]]>
-</script>
-
-<script type="text/javascript" src="<?php echo $api_js_button_international; ?>"></script>
-
-<?php
-
-/**
- * Integration 3 start, show bar*
- */
-if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) : // Rogged
-    // Calculate height
-    $size = 0;
-
-    $UserTemporal = "1";
-    $CartItemCount = 0;
-
-    if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) :
         $cart = $_config->getSession()->getCartSkybox();
         if (!empty($cart)) :
             $UserTemporal = $cart->{'UserTemporal'};
             $CartItemCount = intval($cart->{'CartItemCount'});
-            for ($i = 1; $i <= $CartItemCount; $i++) :
-                $size = $size + 50;
+            for ($i = 0; $i <= $CartItemCount; $i++) :
+                $size = $size + 60;
             endfor;
         endif;
-    endif;
 
+        $merchant = $_helper->getMerchantCode();
+        $storeId = $_helper->getStoreId();
+        $cartId = $_helper->getCartId();
+        $guid = $_checkout->getGuidApi();
+        $urlSuccess = Mage::getUrl("skbcheckout/international/success");
+        $urlConfirm = Mage::getUrl("skbcheckout/international");
+        $token = $_checkout->getAuthorizedToken();
 
-    $merchant = $_helper->getMerchantCode();
-    $storeId = $_helper->getStoreId();
-    $cartId = $_helper->getCartId();
-    $guid = $_model->getGuidApi();
-    $urlSuccess = Mage::getUrl("skbcheckout/international/success");
-    $urlConfirm = Mage::getUrl("skbcheckout/international");
-    $token = $_model->AuthenticateService()->getAuthorizedToken();
+        // Build Iframe
+        $url = $_helper->getSkyboxUrlMain() . "WebForms/Checkout/APICheckout.aspx"; //$_config->skyboxDefaultUrl . "WebForms/Checkout/APICheckout.aspx";
+        $url .= "?token=" . $token;
+        $url .= "&GuiId=" . $guid;
+        $url .= "&merchant=" . $merchant;
+        $url .= "&idCart=" . $cartId;
+        $url .= "&idStore=" . $storeId;
+        $url .= "&UrlC=" . $urlConfirm;// "http://magento.skynet.com/magento192/skbcheckout/international";
+        $url .= "&paypal=" . $_GET["paypal"];
+        $url .= '&checkout=' . strip_tags(Mage::app()->getRequest()->getParam('checkout', ''));
+        $url .= "&UrlR=" . $urlSuccess;
 
-    $url = $_helper->getSkyboxUrlMain() . "WebForms/Checkout/APICheckout.aspx"; //$_config->skyboxDefaultUrl . "WebForms/Checkout/APICheckout.aspx";
-    $url .= "?token=" . $token;
-    $url .= "&GuiId=" . $guid;
-    $url .= "&merchant=" . $merchant;
-    $url .= "&idCart=" . $cartId;
-    $url .= "&idStore=" . $storeId;
-    $url .= "&UrlC=" . $urlConfirm;// "http://magento.skynet.com/magento192/skbcheckout/international";
-    $url .= "&paypal=" . $_GET["paypal"];
-    $url .= '&checkout=' . strip_tags(Mage::app()->getRequest()->getParam('checkout',''));
-    $url .= "&UrlR=" . $urlSuccess;
-
-    if($size == 0):
-        $cart = Mage::getSingleton('checkout/session')->getQuote();
-        foreach ($cart->getAllItems() as $item) :
-            $size = $size + 50;
-        endforeach;
-    endif;
-
-    if($size == 0) $size = 100;
-
-    $height = (($UserTemporal == "1") ? 1400 : 900) + $size;
-    $height = 2500;
-    ?>
-    <div class="div_iframe_skybox_checkout">
-        <iframe id="iframe_skybox_checkout" src="<?php echo $url; ?>" frameborder="0" scrolling="no"></iframe>
-    </div>
-    <script type="text/javascript">
-        jQuery(document).ready(function() {
-            var height = <?php echo $height; ?>;
-            var isMobile = /Mobi/.test(navigator.userAgent);
-            console.log("isMobile ::: " + isMobile);
-            if (isMobile) {
-                height = jQuery(window).height();
-                height = height * 5;
-            }
-            console.log("height ::: " + height);
-            jQuery('#iframe_skybox_checkout').attr('height', height);
-        });
-    </script>
-    <?php
-// ----- Rogged -----
-else:
-    Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl("checkout/onepage"));
-endif;
-// ----- ----- -----
+        $height = (($UserTemporal == "1") ? 2000 : 1500) + $size;
+        // $height = 2500;
+    }
+}
 ?>
-<script>
-    setTimeout(function(){
-        var location_pathname = window.location.pathname.split('/');
-        var skx_bar = document.getElementsByClassName('skx-bar-text');
-        try{
-            if(location_pathname[2] === "international") skx_bar[0].style.display = "none";
-        }
-        catch(e) {
 
-        }
-    }, 300);
+<div class="div_iframe_skybox_checkout">
+    <iframe id="iframe_skybox_checkout" src="<?php echo $url; ?>" frameborder="0" scrolling="no"></iframe>
+</div>
 
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        var height = <?php echo $height; ?>;
+        var size = <?php echo $size; ?>;
+        var isMobile = /Mobi/.test(navigator.userAgent);
+        console.log("isMobile ::: " + isMobile);
+        console.log("size ::: " + size);
+        console.log("height ::: " + height);
+        if (isMobile) {
+            height = jQuery(window).height();
+            height = (height * 5) - (size/2);
+        }
+        var height = height + "px";
+        console.log("height (mobile) ::: " + height);
+        jQuery('#iframe_skybox_checkout').attr('height', height);
+        jQuery('#iframe_skybox_checkout').css('height', height);
+    });
 </script>

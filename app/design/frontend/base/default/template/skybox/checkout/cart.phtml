@@ -17,7 +17,7 @@ if ($_helper->getActive()) {
     $_merchant = $_helper->getMerchantCode();
     $template = "";
     $cartId = $_helper->getCartId();
-    $cssVersion= $_helper->getCssVersion();
+    $cssVersion = $_helper->getCssVersion();
 
     $_checkout->InitializeBarSkybox();
 
@@ -47,7 +47,7 @@ if ($_helper->getActive()) {
         if (!empty($cart)) :
             $template = $cart->BarHtmlTemplate;
             foreach ($cart as $key => $value) :
-                $template = str_replace('{' . $key . '}', $value, $template);
+                $template = str_ireplace('{' . $key . '}', $value, $template);
             endforeach;
         endif;
         $_cartDataURL = $cart->CartDataURL;
@@ -74,9 +74,8 @@ if ($_helper->getActive()) {
 
     $skyBoxUrlClientBase = $_helper->getSkyBoxUrlAPI();
     $storeCode = Mage::getModel('skyboxcatalog/api_product')->getStoreCode();
-    $skyBoxUrlClientGet = str_replace("apirest/", "", $skyBoxUrlClientBase);
+    $skyBoxUrlClientGet = str_ireplace("apirest/", "", $skyBoxUrlClientBase);
     $skyBoxUrlClient = $skyBoxUrlClientGet . "multiplecalculate/" . $storeCode . "/calc-";
-    $skyboxForceReload = intval(Mage::getBlockSingleton('page/html_header')->getIsHomePage());
     ?>
 
     <link rel="stylesheet" type="text/css" href="<?php echo $api_css_button_international; ?>"/>
@@ -95,7 +94,6 @@ if ($_helper->getActive()) {
         var IS_SKYBOX_VISIBLE = "<?php echo $_checkout->getLocationAllow(); ?>";
         var URL_BASE_MAGENTO = "<?php echo Mage::getBaseUrl() ?>";
         var IS_REGISTRATION_DISABLED_SKYBOX = 1;
-        var SKYBOX_FORCE_RELOAD = "<?php echo $skyboxForceReload; ?>";
         var LOADING_IMAGE = "<?php echo $this->getSkinUrl('images/skybox/ajax-loading.gif')?>";
 
         (function ($) {
@@ -127,26 +125,8 @@ if ($_helper->getActive()) {
         //]]>
     </script>
     <script type="text/javascript" src="<?php echo $api_js_button_international; ?>"></script>
-    <?php
-    // note: Just to force reload page on Home Page.
-    $forceReload = $_config->getSession()->getChangeCountryHomePage();
-    $forceReload = isset($forceReload) ? $forceReload : 0;
-
-//    if (Mage::getBlockSingleton('page/html_header')->getIsHomePage()) :
-    if ($skyboxForceReload):
-        if ($forceReload == 1):
-            $forceReload = 0;
-            $_config->getSession()->setChangeCountryHomePage($forceReload);
-            ?>
-            <script type="text/javascript">
-                console.log("[Skybox] Reloading page...");
-//                window.location.reload(true);
-            </script>
-            <?php
-        endif;
-    endif;
-    ?>
     <script>
+        // @todo Fix more Change countries Block issue
         setTimeout(function () {
             jQuery("a[href='#'].skx-bar-other").attr('href', 'javascript:;');
             var country_change = "<?php echo $countryChange?>";

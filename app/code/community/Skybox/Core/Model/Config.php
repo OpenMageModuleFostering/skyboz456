@@ -15,7 +15,7 @@
 class Skybox_Core_Model_Config
 {
 
-    const SKYBOX_VERSION = "1.2.10";
+    const SKYBOX_VERSION = "1.2.11";
     /**
      * Skybox cookie
      * @var string

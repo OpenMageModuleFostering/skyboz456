@@ -19,28 +19,49 @@ class Skybox_Checkout_Block_Sales_Order_Total extends Mage_Sales_Block_Order_Tot
 
         $order = $this->getOrder();
 
-        //Mage::log('$order', null, 'tracer.log', true);
-        //Mage::log(print_r($order->debug(), true), null, 'tracer.log', true);
+        // Mage::log('$order', null, 'tracer.log', true);
+        // Mage::log(print_r($order->debug(), true), null, 'tracer.log', true);
 
-        $ConceptsSkyboxjson = json_decode($order->getConceptsSkybox());
+        $objData = json_decode($order->getConceptsSkybox());
 
-        //Mage::log('$ConceptsSkyboxjson', null, 'tracer.log', true);
-//        Mage::log(print_r($ConceptsSkyboxjson, true), null, 'tracer.log', true);
-        if (count($ConceptsSkyboxjson) > 0) {
-            $i = 0;
-            foreach ($ConceptsSkyboxjson as $item) {
-                if ($item->Visible != 0) {
-                    $i += 1;
-                    $this->getParentBlock()->addTotal(new Varien_Object(array(
-                        'code' => 'checkout_total' . $i,
-                        'value' => $item->ValueUSD,//$item->Value
-                        'base_value' => $item->ValueUSD,//$item->Value
-                        'label' => $item->Concept,
-                    )), 'subtotal', 'tax');
+        // Mage::log('$ConceptsSkyboxjson', null, 'tracer.log', true);
+        // Mage::log(print_r($ConceptsSkyboxjson, true), null, 'tracer.log', true);
+
+        if (count($objData) > 0) {
+
+            if (isset($objData->TotalFeeUSD)) {
+                $this->getParentBlock()->addTotal(new Varien_Object(array(
+                    'code'       => 'checkout_total_skybox_fee',
+                    'value'      => $objData->TotalFeeUSD,
+                    'base_value' => $objData->TotalFeeUSD,
+                    'label'      => 'SkyBoxCheckout',
+                )), 'subtotal', 'tax');
+
+                if ($order->getShippingAmount() == 0) {
+                    $this->getParentBlock()->removeTotal('shipping');
                 }
-            }
-            if ($order->getShippingAmount() == 0) {
-                $this->getParentBlock()->removeTotal('shipping');
+
+            } else {
+
+                // @note: Only for compatibility, should be removed.
+                $i = 0;
+
+                $ConceptsSkyboxjson = json_decode($order->getConceptsSkybox());
+
+                foreach ($ConceptsSkyboxjson as $item) {
+                    if ($item->Visible != 0) {
+                        $i += 1;
+                        $this->getParentBlock()->addTotal(new Varien_Object(array(
+                            'code'       => 'checkout_total' . $i,
+                            'value'      => $item->ValueUSD,//$item->Value
+                            'base_value' => $item->ValueUSD,//$item->Value
+                            'label'      => $item->Concept,
+                        )), 'subtotal', 'tax');
+                    }
+                }
+                if ($order->getShippingAmount() == 0) {
+                    $this->getParentBlock()->removeTotal('shipping');
+                }
             }
         }
 
@@ -51,9 +72,9 @@ class Skybox_Checkout_Block_Sales_Order_Total extends Mage_Sales_Block_Order_Tot
     {
         /** @var Skybox_Core_Model_Api_Restful $api_restful */
         $api_restful = Mage::getModel('skyboxcore/api_restful');
-        $activation = $api_restful->isModuleEnable();
+        $activation  = $api_restful->isModuleEnable();
 
-        if (!$activation) {
+        if ( ! $activation) {
             return false;
         }
 
@@ -62,7 +83,7 @@ class Skybox_Checkout_Block_Sales_Order_Total extends Mage_Sales_Block_Order_Tot
 
         $locationAllow = $allowHelper->getLocationAllow();
 
-        if (!$locationAllow) {
+        if ( ! $locationAllow) {
             return false;
         }
 

@@ -14,7 +14,6 @@
  *
  * @author  Luis Alex Cordova Leon <lcordova@skyworldint.com>
  */
-
 class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
 {
     const SKYBOX_SHIPPING = 'skyboxcheckout_shipping_skyboxcheckout';
@@ -38,13 +37,14 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
             $order = Mage::getModel('sales/order')->loadByIncrementId($orderIncrementId);
             $order->setData('state', $status); //complete
             $order->setStatus($status);
-            if(Mage_Sales_Model_Order::STATE_PROCESSING == $status){
+            if (Mage_Sales_Model_Order::STATE_PROCESSING == $status) {
                 $order->setTotalPaid($order->getGrandTotal());
-            }elseif(Mage_Sales_Model_Order::STATE_COMPLETE == $status){
+            } elseif (Mage_Sales_Model_Order::STATE_COMPLETE == $status) {
                 $history = $order->addStatusHistoryComment('La orden se estableció como completa', false);
                 $history->setIsCustomerNotified(false);
             }
             $order->save();
+
             return true;
         } catch (Exception $e) {
             return false;
@@ -61,6 +61,7 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
             $quote->setIsActive(false);
             $quote->save();
             Mage::log("API setQuoteDesactive finished " . date('m/d/Y h:i:s a', time()));
+
             return true;
         } catch (Exception $e) {
             return false;
@@ -73,8 +74,20 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
      * @params many
      * @return integer Quote ID
      */
-    public function generateOrder($IdCart, $IdStore, $CustomerName, $CustomerLasName, $CustomerEmail, $CustomerAdresss, $CustomerPhone, $CustomerZipCode, $CityName, $CountryId, $RegionId, $regionName = '')
-    {
+    public function generateOrder(
+        $IdCart,
+        $IdStore,
+        $CustomerName,
+        $CustomerLasName,
+        $CustomerEmail,
+        $CustomerAdresss,
+        $CustomerPhone,
+        $CustomerZipCode,
+        $CityName,
+        $CountryId,
+        $RegionId,
+        $regionName = ''
+    ) {
 
         Mage::log("API generateOrder started " . date('m/d/Y h:i:s a', time()));
 
@@ -131,19 +144,19 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
         $CustomerLasName = ($CustomerLasName != null) ? $CustomerLasName : $CustomerName;
 
         $addressData = array(
-            'firstname' => $CustomerName,
-            'lastname' => $CustomerLasName,
-            'street' => $CustomerAdresss,
-            'city' => $CityName,
-            'postcode' => $CustomerZipCode,
-            'telephone' => $CustomerPhone,
-            'country_id' => $CountryId,
-            'region_id' => $RegionId,
-            'region' => $regionName,
+            'firstname'          => $CustomerName,
+            'lastname'           => $CustomerLasName,
+            'street'             => $CustomerAdresss,
+            'city'               => $CityName,
+            'postcode'           => $CustomerZipCode,
+            'telephone'          => $CustomerPhone,
+            'country_id'         => $CountryId,
+            'region_id'          => $RegionId,
+            'region'             => $regionName,
             'is_default_billing' => '1',
         );
 
-        $billingAddress = $quote->getBillingAddress()->addData($addressData);
+        $billingAddress  = $quote->getBillingAddress()->addData($addressData);
         $shippingAddress = $quote->getShippingAddress()->addData($addressData);
 
 //        if(!Mage::getStoreConfig('payment/checkmo/active')){
@@ -152,9 +165,9 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
 //        }
 
         $shippingAddress->setCollectShippingRates(true)
-            ->collectShippingRates()
-            ->setShippingMethod(self::SKYBOX_SHIPPING)//flatrate_flatrate
-            ->setPaymentMethod(self::SKYBOX_PAYMENT);
+                        ->collectShippingRates()
+                        ->setShippingMethod(self::SKYBOX_SHIPPING)//flatrate_flatrate
+                        ->setPaymentMethod(self::SKYBOX_PAYMENT);
 
         $quote->getPayment()->importData(array('method' => self::SKYBOX_PAYMENT));
 //        $quote->getPayment()->importData(array('method' => 'checkmo'));
@@ -183,6 +196,7 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
             Mage::log("API generateOrder finished " . date('m/d/Y h:i:s a', time()));
             Mage::log("API Construct finished " . date('m/d/Y h:i:s a', time()));
             Mage::log("getShippingMethod: " . $order->getShippingMethod());*/
+
             return $order->getIncrementId();
         } catch (Exception $e) {
             Mage::log("exception", null, 'servicios.log', true);
@@ -190,20 +204,34 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
         }
     }
 
-    public function generateOrderFull($DataProducts, $IdStore, $CustomerName, $CustomerLasName, $CustomerEmail, $CustomerAdresss, $CustomerPhone, $CustomerZipCode, $CityName, $CountryId, $RegionId, $regionName = '')
-    {
+    public function generateOrderFull(
+        $DataProducts,
+        $IdStore,
+        $CustomerName,
+        $CustomerLasName,
+        $CustomerEmail,
+        $CustomerAdresss,
+        $CustomerPhone,
+        $CustomerZipCode,
+        $CityName,
+        $CountryId,
+        $RegionId,
+        $regionName = ''
+    ) {
         Mage::log("API generateOrderFull started " . date('m/d/Y h:i:s a', time()));
 
-        $IdStore = !empty($IdStore)?$IdStore:Mage::app()->getStore('default')->getId();
-        $quote = Mage::getModel('sales/quote')->setStoreId($IdStore);
+        $IdStore = ! empty($IdStore) ? $IdStore : Mage::app()->getStore('default')->getId();
+
+        /** @var $quote Mage_Sales_Model_Quote */
+        $quote       = Mage::getModel('sales/quote')->setStoreId($IdStore);
         $productList = array();
-        $objData = json_decode($DataProducts);
+        $objData     = json_decode($DataProducts);
         Mage::log('########### $objData ###########', null, 'tracer.log', true);
         Mage::log(print_r($objData, true), null, 'tracer.log', true);
-        if(count($objData->Products)>0){
-            foreach ($objData->Products as $prod){
-                $product = Mage::getModel('catalog/product')->load($prod->ProductId);
-                $buyInfo = array(
+        if (count($objData->Products) > 0) {
+            foreach ($objData->Products as $prod) {
+                $product                       = Mage::getModel('catalog/product')->load($prod->ProductId);
+                $buyInfo                       = array(
                     'qty' => $prod->Quantity,
                     // custom option id => value id
                     // or
@@ -218,9 +246,12 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
 
         $quoteId = $quote->getId();
 
+        /** @var Mage_Sales_Model_Quote_Address $address */
         $address = $quote->getShippingAddress();
 
         foreach ($quote->getAllItems() as $item) {
+            /** @var $item Mage_Sales_Model_Quote_Item */
+
             Mage::log('########### $item ###########', null, 'tracer.log', true);
 //            Mage::log(print_r($item->debug(), true), null, 'tracer.log', true);
             Mage::log(print_r($item->getProductId(), true), null, 'tracer.log', true);
@@ -229,6 +260,12 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
             Mage::log(print_r($prod, true), null, 'tracer.log', true);
             $item->setCustomPrice($prod->ProductPriceUSD);
             $item->setOriginalCustomPrice($prod->ProductPriceUSD);
+            $item->setTaxAmount(0);
+            $item->setBaseTaxAmount(0);
+            $item->setTaxPercent(0);
+            $item->setTaxPercent(0);
+            $item->setBaseHiddenTaxAmount(0);
+
 //            getOrderCurrencyCode
 //            $item->getProduct()->setIsSuperMode(true);
 //            $item->save();
@@ -242,6 +279,8 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
         $quote->setCustomerIsGuest(true);
         $quote->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
 
+        $quote->setCustomerTaxClassId(0);
+
 //        $grandTotal = $address->getBaseGrandTotalSkybox();
         $grandTotal = $objData->TotalShoppingCart->TotalPriceUSD;
         Mage::log('########### $grandTotal ###########', null, 'tracer.log', true);
@@ -253,35 +292,39 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
 //        setQuoteCurrencyCode(string $value)
 //        setStoreCurrencyCode(string $value)
 
+
         // Just for Guest User
         $CustomerLasName = ($CustomerLasName != null) ? $CustomerLasName : $CustomerName;
 
         $addressData = array(
-            'firstname' => $CustomerName,
-            'lastname' => $CustomerLasName,
-            'street' => $CustomerAdresss,
-            'city' => $CityName,
-            'postcode' => $CustomerZipCode,
-            'telephone' => $CustomerPhone,
-            'country_id' => $CountryId,
-            'region_id' => $RegionId,
-            'region' => $regionName,
+            'firstname'          => $CustomerName,
+            'lastname'           => $CustomerLasName,
+            'street'             => $CustomerAdresss,
+            'city'               => $CityName,
+            'postcode'           => $CustomerZipCode,
+            'telephone'          => $CustomerPhone,
+            'country_id'         => $CountryId,
+            'region_id'          => $RegionId,
+            'region'             => $regionName,
             'is_default_billing' => '1',
         );
 
-        $billingAddress = $quote->getBillingAddress()->addData($addressData);
+        $billingAddress  = $quote->getBillingAddress()->addData($addressData);
         $shippingAddress = $quote->getShippingAddress()->addData($addressData);
 
         $shippingAddress->setCollectShippingRates(true)
-            ->collectShippingRates()
-            ->setShippingMethod(self::SKYBOX_SHIPPING)//flatrate_flatrate
-            ->setPaymentMethod(self::SKYBOX_PAYMENT);
+                        ->collectShippingRates()
+                        ->setShippingMethod(self::SKYBOX_SHIPPING)//flatrate_flatrate
+                        ->setPaymentMethod(self::SKYBOX_PAYMENT);
 
         $quote->getPayment()->importData(array('method' => self::SKYBOX_PAYMENT));
 
         $quote->collectTotals()->save();
 
-        $address->setConceptsSkybox(json_encode($objData->TotalShoppingCart->ListDetailConcepts));
+        $address->setTaxAmount(0);
+        $address->setBaseTaxAmount(0);
+
+        $address->setConceptsSkybox(json_encode($objData->TotalShoppingCart));
         $address->setGrandTotal($grandTotal);
         $address->setBaseGrandTotal($grandTotal);
 
@@ -299,6 +342,7 @@ class Skybox_Services_Model_Api extends Mage_Api_Model_Resource_Abstract
 
             // setQuoteDesactive
             $this->setQuoteDesactive($quoteId);
+
             //$quote->setIsActive(false);
 
             return $order->getIncrementId();
