@@ -40,141 +40,144 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
      * su parte)
      **/
     public function collect(Mage_Sales_Model_Quote_Address $address) {
+        if($this->_getApi()->getLocationAllow()){ // Rogged
+
         
-        parent::collect($address);  //Comentado por verificar
- 
-        // Si no hay items, no hay nada que hacer
-        $items = $this->_getAddressItems($address);
-        if (!count($items)) {
+            parent::collect($address);  //Comentado por verificar
+     
+            // Si no hay items, no hay nada que hacer
+            $items = $this->_getAddressItems($address);
+            if (!count($items)) {
+                return $this;
+            }
+
+            $quote= $address->getQuote();
+            if(!$quote->isVirtual() && $address->getAddressType() == 'billing'){
+                return $this;
+            }
+
+            //$quote->setCustomerTaxClassId(0);
+
+            //Limpiamos los Valores de Impuestos
+            /*$rates = array();
+            $address->setAppliedTaxes($rates);*/
+
+            /*--------Nuevos conceptos---------*/
+            $totals=$this->_getApi()->GetTotalShoppingCart();
+
+            if ($this->_getApi()->HasError()) {
+                Mage::log("StatusCode: Error", null, 'TotalSales.log', true);
+                 return $this;
+            }
+
+            Mage::log("quote->address->collect : ini", null, 'TotalSales.log', true);        
+
+            //$StatusCode =  $totals->getParameter('StatusCode');
+            //$StatusCode =  $totals->getParameter('StatusCode');//Comentado por estar repetido
+
+            $Customs =  $totals->getParameter('Customs');
+            $CustomsUSD =  $totals->getParameter('CustomsUSD');
+
+            $Shipping =  $totals->getParameter('Shipping');
+            $ShippingUSD =  $totals->getParameter('ShippingUSD');
+
+            $Insurance =  $totals->getParameter('Insurance');
+            $InsuranceUSD =  $totals->getParameter('InsuranceUSD');
+
+            $Taxes =  $totals->getParameter('Taxes');
+            $TaxesUSD =  $totals->getParameter('TaxesUSD');
+
+            $Duties =  $totals->getParameter('Duties');
+            $DutiesUSD =  $totals->getParameter('DutiesUSD');
+
+            $Handling =  $totals->getParameter('Handling');
+            $HandlingUSD =  $totals->getParameter('HandlingUSD');
+
+            $Clearence =  $totals->getParameter('Clearence');
+            $ClearenceUSD =  $totals->getParameter('ClearenceUSD');
+
+            $Others =  $totals->getParameter('Others');
+            $OthersUSD =  $totals->getParameter('OthersUSD');
+
+            $Adjustment =  $totals->getParameter('Adjustment');
+            $AdjustmentUSD =  $totals->getParameter('AdjustmentUSD');
+
+            $listAdjustjson =  $totals->getResponse()->{'ListDetailConcepts'};
+
+            $listRmtjson =  $totals->getResponse()->{'ListDetailAdjusts'};
+
+            /*--------------------------------*/
+            // Apuntamos lo que hemos calculado para usarlo luego
+            // Idealmente esto debería ir a parar a la base de datos a un campo 
+            // creado a los efectos 
+            $address->setCustomsTotalSkybox($Customs);
+            $address->setCustomsTotalUsdSkybox($CustomsUSD);
+
+            $address->setShippingTotalSkybox($Shipping);
+            $address->setShippingTotalUsdSkybox($ShippingUSD);
+
+            $address->setInsuranceTotalSkybox($Insurance);
+            $address->setInsuranceTotalUsdSkybox($InsuranceUSD);
+
+            $address->setTaxesTotalSkybox($Taxes);
+            $address->setTaxesTotalUsdSkybox($TaxesUSD);
+
+            $address->setDutiesTotalSkybox($Duties);
+            $address->setDutiesTotalUsdSkybox($DutiesUSD);
+
+            $address->setHandlingTotalSkybox($Handling);
+            $address->setHandlingTotalUsdSkybox($HandlingUSD);
+            
+            $address->setClearenceTotalSkybox($Clearence);
+            $address->setClearenceTotalUsdSkybox($ClearenceUSD);
+
+            $address->setOthersTotalSkybox($Others);
+            $address->setOthersTotalUsdSkybox($OthersUSD);
+
+            $address->setAdjustTotalSkybox($Adjustment);
+            $address->setAdjustTotalUsdSkybox($AdjustmentUSD);
+
+            $address->setConceptsSkybox(json_encode($listAdjustjson));
+
+            $address->setRmtSkybox(json_encode($listRmtjson));
+
+            $totalskybox=0;
+            //$totalskybox=$Taxes+$Handling+$Shipping+$Insurance+$Clearence+$Duties+$Others-$Adjustment;
+            $subtotalskybox=$totals->getResponse()->{'StoreProductPrice'};
+            $totalskybox=$totals->getResponse()->{'TotalProduct'};
+            //$totalskyboxbase=$TaxesUSD+$HandlingUSD+$ShippingUSD+$InsuranceUSD+$ClearenceUSD+$DutiesUSD+$OthersUSD-$AdjustmentUSD;
+            $subtotalskyboxbase=$totals->getResponse()->{'StoreProductPriceUSD'};
+            $totalskyboxbase=$totals->getResponse()->{'TotalProductUSD'};
+            /*$address->setBasePaypalfeeAmount($this->_amount);*/   
+
+            // Actualizamos el total de la quote
+            //$address->setGrandTotal($address->getGrandTotal() +$totalskybox);
+            //$address->setBaseGrandTotal($address->getBaseGrandTotal() + $totalskyboxbase);
+
+            $address->setSubTotal(100);
+            $address->setBaseSubTotal(100);
+            $address->setGrandTotal($totalskybox);
+            $address->setBaseGrandTotal($totalskyboxbase);
+
+            //$address->setGrandTotalSkybox($address->getGrandTotal() + $totalskybox);
+            //$address->setBaseGrandTotalSkybox($address->getBaseGrandTotal() + $totalskyboxbase);        
+
+            $address->setSubtotalSkybox($subtotalskybox);
+            $address->setBaseSubtotalSkybox($totalskyboxbase);
+            $address->setGrandTotalSkybox($totalskybox);
+            $address->setBaseGrandTotalSkybox($totalskyboxbase);
+
+            //$address->setTaxAmount(0);
+
+            //$address->save(); //Guardamos los Cambios
+            Mage::log("quote->address->collect->getSubTotal->" . $address->getSubTotal(), null, 'TotalSales.log', true); 
+            Mage::log("quote->address->collect->getGrandTotal->" . $address->getGrandTotal(), null, 'TotalSales.log', true); 
+
+            Mage::log("quote->address->collect->Total->" . $totalskybox, null, 'TotalSales.log', true); 
+            Mage::log("quote->address->collect : fin", null, 'TotalSales.log', true); 
+
             return $this;
         }
-
-        $quote= $address->getQuote();
-        if(!$quote->isVirtual() && $address->getAddressType() == 'billing'){
-            return $this;
-        }
-
-        //$quote->setCustomerTaxClassId(0);
-
-        //Limpiamos los Valores de Impuestos
-        /*$rates = array();
-        $address->setAppliedTaxes($rates);*/
-
-        /*--------Nuevos conceptos---------*/
-        $totals=$this->_getApi()->GetTotalShoppingCart();
-
-        if ($this->_getApi()->HasError()) {
-            Mage::log("StatusCode: Error", null, 'TotalSales.log', true);
-             return $this;
-        }
-
-        Mage::log("quote->address->collect : ini", null, 'TotalSales.log', true);        
-
-        //$StatusCode =  $totals->getParameter('StatusCode');
-        //$StatusCode =  $totals->getParameter('StatusCode');//Comentado por estar repetido
-
-        $Customs =  $totals->getParameter('Customs');
-        $CustomsUSD =  $totals->getParameter('CustomsUSD');
-
-        $Shipping =  $totals->getParameter('Shipping');
-        $ShippingUSD =  $totals->getParameter('ShippingUSD');
-
-        $Insurance =  $totals->getParameter('Insurance');
-        $InsuranceUSD =  $totals->getParameter('InsuranceUSD');
-
-        $Taxes =  $totals->getParameter('Taxes');
-        $TaxesUSD =  $totals->getParameter('TaxesUSD');
-
-        $Duties =  $totals->getParameter('Duties');
-        $DutiesUSD =  $totals->getParameter('DutiesUSD');
-
-        $Handling =  $totals->getParameter('Handling');
-        $HandlingUSD =  $totals->getParameter('HandlingUSD');
-
-        $Clearence =  $totals->getParameter('Clearence');
-        $ClearenceUSD =  $totals->getParameter('ClearenceUSD');
-
-        $Others =  $totals->getParameter('Others');
-        $OthersUSD =  $totals->getParameter('OthersUSD');
-
-        $Adjustment =  $totals->getParameter('Adjustment');
-        $AdjustmentUSD =  $totals->getParameter('AdjustmentUSD');
-
-        $listAdjustjson =  $totals->getResponse()->{'ListDetailConcepts'};
-
-        $listRmtjson =  $totals->getResponse()->{'ListDetailAdjusts'};
-
-        /*--------------------------------*/
-        // Apuntamos lo que hemos calculado para usarlo luego
-        // Idealmente esto debería ir a parar a la base de datos a un campo 
-        // creado a los efectos 
-        $address->setCustomsTotalSkybox($Customs);
-        $address->setCustomsTotalUsdSkybox($CustomsUSD);
-
-        $address->setShippingTotalSkybox($Shipping);
-        $address->setShippingTotalUsdSkybox($ShippingUSD);
-
-        $address->setInsuranceTotalSkybox($Insurance);
-        $address->setInsuranceTotalUsdSkybox($InsuranceUSD);
-
-        $address->setTaxesTotalSkybox($Taxes);
-        $address->setTaxesTotalUsdSkybox($TaxesUSD);
-
-        $address->setDutiesTotalSkybox($Duties);
-        $address->setDutiesTotalUsdSkybox($DutiesUSD);
-
-        $address->setHandlingTotalSkybox($Handling);
-        $address->setHandlingTotalUsdSkybox($HandlingUSD);
-        
-        $address->setClearenceTotalSkybox($Clearence);
-        $address->setClearenceTotalUsdSkybox($ClearenceUSD);
-
-        $address->setOthersTotalSkybox($Others);
-        $address->setOthersTotalUsdSkybox($OthersUSD);
-
-        $address->setAdjustTotalSkybox($Adjustment);
-        $address->setAdjustTotalUsdSkybox($AdjustmentUSD);
-
-        $address->setConceptsSkybox(json_encode($listAdjustjson));
-
-        $address->setRmtSkybox(json_encode($listRmtjson));
-
-        $totalskybox=0;
-        //$totalskybox=$Taxes+$Handling+$Shipping+$Insurance+$Clearence+$Duties+$Others-$Adjustment;
-        $subtotalskybox=$totals->getResponse()->{'StoreProductPrice'};
-        $totalskybox=$totals->getResponse()->{'TotalProduct'};
-        //$totalskyboxbase=$TaxesUSD+$HandlingUSD+$ShippingUSD+$InsuranceUSD+$ClearenceUSD+$DutiesUSD+$OthersUSD-$AdjustmentUSD;
-        $subtotalskyboxbase=$totals->getResponse()->{'StoreProductPriceUSD'};
-        $totalskyboxbase=$totals->getResponse()->{'TotalProductUSD'};
-        /*$address->setBasePaypalfeeAmount($this->_amount);*/   
-
-        // Actualizamos el total de la quote
-        //$address->setGrandTotal($address->getGrandTotal() +$totalskybox);
-        //$address->setBaseGrandTotal($address->getBaseGrandTotal() + $totalskyboxbase);
-
-        $address->setSubTotal(100);
-        $address->setBaseSubTotal(100);
-        $address->setGrandTotal($totalskybox);
-        $address->setBaseGrandTotal($totalskyboxbase);
-
-        //$address->setGrandTotalSkybox($address->getGrandTotal() + $totalskybox);
-        //$address->setBaseGrandTotalSkybox($address->getBaseGrandTotal() + $totalskyboxbase);        
-
-        $address->setSubtotalSkybox($subtotalskybox);
-        $address->setBaseSubtotalSkybox($totalskyboxbase);
-        $address->setGrandTotalSkybox($totalskybox);
-        $address->setBaseGrandTotalSkybox($totalskyboxbase);
-
-        //$address->setTaxAmount(0);
-
-        //$address->save(); //Guardamos los Cambios
-        Mage::log("quote->address->collect->getSubTotal->" . $address->getSubTotal(), null, 'TotalSales.log', true); 
-        Mage::log("quote->address->collect->getGrandTotal->" . $address->getGrandTotal(), null, 'TotalSales.log', true); 
-
-        Mage::log("quote->address->collect->Total->" . $totalskybox, null, 'TotalSales.log', true); 
-        Mage::log("quote->address->collect : fin", null, 'TotalSales.log', true); 
-
-        return $this;
     }
  
     /**
@@ -184,48 +187,49 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
      * simplemente retornar el valor formateado y que Magento lo muestre.
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address) {        
-        
-        parent::fetch($address); //Comentado por verificar
+        if($this->_getApi()->getLocationAllow()){ // Rogged
+            parent::fetch($address); //Comentado por verificar
 
-        $quote= $address->getQuote();
-        if(!$quote->isVirtual() && $address->getAddressType() == 'billing'){
+            $quote= $address->getQuote();
+            if(!$quote->isVirtual() && $address->getAddressType() == 'billing'){
+                return $this;
+            }
+            
+            $ConceptsSkyboxjson = json_decode($address->getConceptsSkybox());
+
+            Mage::log("quote->address->fetch : ini", null, 'TotalSales.log', true);
+            Mage::log("quote->address->fetch->getSubTotal->" . $address->getSubTotal(), null, 'TotalSales.log', true); 
+            Mage::log("quote->address->fetch->getGrandTotal->" . $address->getGrandTotal(), null, 'TotalSales.log', true); 
+
+            /*
+             * Reescribimos el monto del SubTotal a Mostrar
+             */
+            $address->addTotal(array(
+                 'code'=> 'subtotal',
+                 'title'=>Mage::helper('sales')->__('Subtotal'),
+                 'value'=> $address->getSubtotalSkybox()
+            ));
+
+            /*
+             * Reescribimos el monto de los conceptos a Mostrar
+             */
+            $i=0;        
+            foreach ($ConceptsSkyboxjson as $item) {
+                if($item->Value > 0)
+                {
+                    $i+=1;
+                    $address->addTotal(array(
+                            'code'  => 'checkout_total'.$i,
+                            'title' => $item->Concept,
+                            'value' => $item->Value
+                        ));
+                    Mage::log("quote->address->fetch(Concepts)->" . $item->Concept . "=" . $item->Value, null, 'TotalSales.log', true);
+                }            
+            }
+            Mage::log("quote->address->fetch : fin", null, 'TotalSales.log', true);        
+            // Retornamos el total con su título
             return $this;
         }
-        
-        $ConceptsSkyboxjson = json_decode($address->getConceptsSkybox());
-
-        Mage::log("quote->address->fetch : ini", null, 'TotalSales.log', true);
-        Mage::log("quote->address->fetch->getSubTotal->" . $address->getSubTotal(), null, 'TotalSales.log', true); 
-        Mage::log("quote->address->fetch->getGrandTotal->" . $address->getGrandTotal(), null, 'TotalSales.log', true); 
-
-        /*
-         * Reescribimos el monto del SubTotal a Mostrar
-         */
-        $address->addTotal(array(
-             'code'=> 'subtotal',
-             'title'=>Mage::helper('sales')->__('Subtotal'),
-             'value'=> $address->getSubtotalSkybox()
-        ));
-
-        /*
-         * Reescribimos el monto de los conceptos a Mostrar
-         */
-        $i=0;        
-        foreach ($ConceptsSkyboxjson as $item) {
-            if($item->Value > 0)
-            {
-                $i+=1;
-                $address->addTotal(array(
-                        'code'  => 'checkout_total'.$i,
-                        'title' => $item->Concept,
-                        'value' => $item->Value
-                    ));
-                Mage::log("quote->address->fetch(Concepts)->" . $item->Concept . "=" . $item->Value, null, 'TotalSales.log', true);
-            }            
-        }
-        Mage::log("quote->address->fetch : fin", null, 'TotalSales.log', true);        
-        // Retornamos el total con su título
-        return $this;
     }
 }
 

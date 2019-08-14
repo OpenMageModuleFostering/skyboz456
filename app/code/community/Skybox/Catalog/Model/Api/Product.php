@@ -387,7 +387,6 @@ class Skybox_Catalog_Model_Api_Product extends Skybox_Core_Model_Standard
     {
         if (null == $this->_isUSD)
             $this->_isUSD = ($this->getParameter(Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_CART_CURRENCY_ISO, "") == Skybox_Core_Model_Config::SKYBOX_CURRENCY_USD);
-
         return $this->_isUSD;
     }
 

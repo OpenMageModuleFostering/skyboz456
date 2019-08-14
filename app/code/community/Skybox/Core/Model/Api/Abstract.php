@@ -226,6 +226,8 @@ class Skybox_Core_Model_Api_Abstract extends Varien_Object
     	if($this->ErrorTokenInvalid()) return true;
     	if($this->ErrorToAddProductToCart()) return true;*/
 
+        if($this->ErrorRatesNotFound()) return true;
+
         if($this->ErrorServiceNotController()) return true;
         
         if($this->ErrorIpNoAllow()) return true;
@@ -359,5 +361,9 @@ class Skybox_Core_Model_Api_Abstract extends Varien_Object
     public function ErrorMerchantKeyIsnull()
     {
         return $this->getStatusCode() == Skybox_Core_Model_Config::SKYBOX_ERROR_GCODE_MERCHANT_KEY_IS_NULL;
+    }
+    public function ErrorRatesNotFound()
+    {
+        return $this->getStatusCode() == Skybox_Core_Model_Config::SKYBOX_ERROR_GCODE_RATES_NOT_FOUND;
     }
 }

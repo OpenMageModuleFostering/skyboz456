@@ -49,9 +49,9 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         // Set SkyboxUser session
         $this->_getConfig()->getSession()->setSkyboxUser($response);
 
-        if ($this->getLocationAllow()) {
-            $this->_getConfig()->getSession()->setCartSkybox($response);
-        }
+        //if ($this->getLocationAllow()) { // Rogged, la primera vez q usuario ingresa con un pais disabled, lanza error porq no se envia datos a url de popup
+        $this->_getConfig()->getSession()->setCartSkybox($response);
+        //}
         //}
     }
 
@@ -120,7 +120,8 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
     public function DeleteProductOfCart($productId)
     {
 
-        if (!$this->getErrorAuthenticate() && $this->getLocationAllow()) {
+        #if (!$this->getErrorAuthenticate() && $this->getLocationAllow()) { // Rogged
+        if (!$this->getErrorAuthenticate()) { // Rogged
             $params = array(
                 Skybox_Core_Model_Config::SKYBOX_PARAMETER_MERCHANT => $this->getMerchant(),
                 Skybox_Core_Model_Config::SKYBOX_PARAMETER_TOKEN => $this->getAuthorizedToken(),

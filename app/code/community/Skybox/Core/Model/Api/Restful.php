@@ -112,6 +112,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
     public function setLocationAllow($value = null)
     {
         $allow = $this->getResponseJson()->{Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_LOCATION_ALLOW};
+        //$allow = 0; // Rogged
         $this->_config->getSession()->setLocationAllow($allow);
         return $this;
     }

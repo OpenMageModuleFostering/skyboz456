@@ -1,0 +1,29 @@
+<div>
+    <?php
+    $message = Mage::getSingleton('core/session')->getSkyboxSuccessMsg();
+    if (isset($message)) {
+        echo $message;
+    }
+    echo "<br/><br/>";
+    /*echo $_POST["STATUS"] . "<br/>";
+    echo $_POST["STATUS_DESCRIPTION"] . "<br/>";
+    echo $_POST["ORDER_NUMBER"] . "<br/>";
+    echo $_POST["CUSTOMER_EMAIL"] . "<br/>";
+    echo $_POST["CUSTOMER_NAME"] . "<br/>";
+    echo $_POST["CUSTOMER_ID"] . "<br/>";
+    echo $_POST["CUSTOMER_ADDRESS"] . "<br/>";
+    echo $_POST["CUSTOMER_COUNTRY"] . "<br/>";
+    echo $_POST["CUSTOMER_REGION"] . "<br/>";
+    echo $_POST["CUSTOMER_CITY"] . "<br/>";
+    echo $_POST["CUSTOMER_ZIPCODE"] . "<br/>";
+    echo $_POST["ORDER_CURRENCY"] . "<br/>";
+    echo $_POST["ORDER_AMOUNT"] . "<br/>";
+    echo $_POST["ORDER_PAYMENT_METHOD"] . "<br/>";
+    echo $_POST["ORDER_CONCEPTS"] . "<br/><br/>";*/
+
+    echo $_POST["INVOICE_HTML"] . "<br/>";
+    /*if (isset($_POST['ORDER_CONCEPTS'])
+		foreach ($_POST['ORDER_CONCEPTS'] as $value)
+			echo $value . "<br/>";*/
+    ?>
+</div>

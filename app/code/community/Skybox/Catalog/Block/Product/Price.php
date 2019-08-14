@@ -22,7 +22,7 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
 
     public function getCacheCode()
     {
-         Mage::log("cache ", null, 'orden.log', true);
+        Mage::log("cache ", null, 'orden.log', true);
         if ($this->_cache_code == null) {
             /* @var $config Skybox_Core_Model_Config */
             $config = Mage::getModel("skyboxcore/config");
@@ -76,43 +76,44 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
      */
     public function _toHtml()
     {
-        if ($this->_getApi()->getErrorAuthenticate() && !$this->_getApi()->getLocationAllow() && $this->_getApi()->HasError()) {
-            return '';
-        } elseif ($this->_getApi()->HasError()) {
-            //$error_code = $this->_getApi()->getStatusCode();
-            $message = $this->_getApi()->getStatusMessage();
-            return '<div style="color:#FF0000;">' . $message . '</div>';
-        }
-
-        /* @var $product Mage_Catalog_Model_Product */
-        $product = $this->getProduct();
-        $type = $product->getTypeId();
-        $route_name = Mage::app()->getRequest()->getRouteName();
-
-        // Simple Product
-        if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/price.phtml') {
-            return $this->calculatePrice($product);
-        }
-
-        if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/view/price_clone.phtml') {
-            return '';
-        }
-
-        // Configurable Product
-        if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/price.phtml') {
-            if ($route_name == 'catalog') {
+        if($this->_getApi()->getLocationAllow()){ // Rogged
+            if ($this->_getApi()->getErrorAuthenticate() && !$this->_getApi()->getLocationAllow() && $this->_getApi()->HasError()) {
                 return '';
+            } elseif ($this->_getApi()->HasError()) {
+                //$error_code = $this->_getApi()->getStatusCode();
+                $message = $this->_getApi()->getStatusMessage();
+                return '<div style="color:#FF0000;">' . $message . '</div>';
             }
-            return $this->calculatePrice($product);
-        }
 
-        if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/view/tierprices.phtml') {
-            if ($route_name == 'catalog') {
+            /* @var $product Mage_Catalog_Model_Product */
+            $product = $this->getProduct();
+            $type = $product->getTypeId();
+            $route_name = Mage::app()->getRequest()->getRouteName();
+
+            // Simple Product
+            if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/price.phtml') {
                 return $this->calculatePrice($product);
             }
-            return '';
-        }
 
+            if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/view/price_clone.phtml') {
+                return '';
+            }
+
+            // Configurable Product
+            if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/price.phtml') {
+                if ($route_name == 'catalog') {
+                    return '';
+                }
+                return $this->calculatePrice($product);
+            }
+
+            if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/view/tierprices.phtml') {
+                if ($route_name == 'catalog') {
+                    return $this->calculatePrice($product);
+                }
+                return '';
+            }
+        }
         return parent::_toHtml();
     }
 

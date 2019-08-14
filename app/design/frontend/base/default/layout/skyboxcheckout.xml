@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <skyboxcheckout_international_index>
+        <reference name="content">
+            <block type="core/template" name="skyboxcheckout.international.index" template="skybox/checkout/skyboxcheckout.phtml"></block>
+        </reference>
+    </skyboxcheckout_international_index>
+    <skyboxcheckout_international_success>
+        <reference name="content">
+            <block type="core/template" name="skyboxcheckout.international.index" template="skybox/checkout/skyboxsuccess.phtml"></block>
+        </reference>
+    </skyboxcheckout_international_success>
+    <checkout_onepage_index>
+        <reference name="checkout.onepage">
+            <!--<action method="setTemplate"><template>skybox/checkout/onepage.phtml</template></action>-->
+            <action method="setTemplate" ><template helper="checkout/data/getLayoutCheckoutSkybox"/></action> <!-- Rogged -->
+        </reference>
+    </checkout_onepage_index>
+
+    <!--
+    Shopping cart item renderer
+    -->
+
+
+    <checkout_cart_index>
+        <!-- Rogged he quitado la invocación de cart -->
+        
+        <reference name="checkout.cart.shipping">
+            <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
+        </reference>
+
+        <reference name="checkout.cart.sidebar">
+            <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
+        </reference>
+<!--
+        <reference name="checkout.cart">
+
+            <action method="setTemplate">
+                <template>skybox/checkout/cart_list.phtml</template>
+            </action>
+
+            <action method="setCartTemplate"><value>skybox/checkout/cart_list.phtml</value></action>
+            <action method="setEmptyTemplate"><value>checkout/cart/noItems.phtml</value></action>
+            <action method="chooseTemplate"/>
+
+            <action method="addItemRender">
+                <type>simple</type>
+                <block>checkout/cart_item_renderer</block>
+                <template>skybox/checkout/cart/item/default.phtml</template>
+            </action>
+
+            <action method="addItemRender">
+                <type>grouped</type>
+                <block>checkout/cart_item_renderer_grouped</block>
+                <template>skybox/checkout/cart/item/default.phtml</template>
+            </action>
+
+            <action method="addItemRender">
+                <type>configurable</type>
+                <block>checkout/cart_item_renderer_configurable</block>
+                <template>skybox/checkout/cart/item/default.phtml</template>
+            </action>
+
+            <action method="addItemRender">
+                <type>bundle</type>
+                <block>bundle/checkout_cart_item_renderer</block>
+                <template>skybox/checkout/cart/item/default.phtml</template>
+            </action>
+
+        </reference>
+
+        <reference name="checkout.cart.shipping">
+            <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
+        </reference>
+
+        <reference name="checkout.cart.sidebar">
+            <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
+        </reference>
+-->
+    </checkout_cart_index>
+
+    <default>
+        <reference name="head">
+            <!--<block type="directory/currency" name="custom_currency_selector" template="currency/currency.phtml"/>-->
+            <action method="addJs"><script>prototype/window.js</script></action>
+            <action method="addJs"><script>prototype/debug.js</script></action>
+            <action method="addJs"><script>prototype/effects.js</script></action>
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/alphacube.css</name></action>
+
+            <action method="addJs"><script>skybox/load-jquery.js</script></action>
+
+            <!-- jQuery ver. 1.7.2 -->
+            <!--
+            <action method="addJs"><script>skybox/jquery.min.js</script></action>
+            <action method="addJs"><script>skybox/jquery.ba-resize.min.js</script></action>
+
+            <block type="core/text" name="google.cdn.jquery">
+                <action method="setText">
+                    <text><![CDATA[<script type="text/javascript">jQuery.noConflict();</script>]]></text>
+                </action>
+            </block>
+            -->
+
+            <!--
+            <block type="core/text" name="google.cdn.jquery">
+                <action method="setText">
+                    <text><![CDATA[<script type="text/javascript">
+                    if ( (typeof jQuery === 'undefined') && !window.jQuery ) {
+                        document.write(unescape("%3Cscript type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'%3E%3C/script%3E"));
+                        document.write(unescape("%3Cscript type='text/javascript'%3E%3C/script%3E jQuery.noConflict(); %3Cscript%3E%3C/script%3E"));
+                    }</script>]]></text>
+                </action>
+            </block>
+            -->
+
+            <action method="addItem"><type>skin_js</type><name>js/skybox/catalog.product.configurable.js</name></action>
+        </reference>
+
+        <reference name="top.container">
+            <block type="core/template" name="skyboxcheckout.top.container.cart" before="-" template="skybox/checkout/cart.phtml"/>
+        </reference>
+
+        <reference name="right">
+            <remove name="checkout/cart_sidebar"/>
+            <block type="checkout/cart_sidebar" name="cart_sidebar" template="checkout/cart/sidebar.phtml" before="-">
+                <action method="addItemRender"><type>simple</type><block>checkout/cart_item_renderer</block><template>skybox/checkout/cart/sidebar/default.phtml</template></action>
+                <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>skybox/checkout/cart/sidebar/default.phtml</template></action>
+                <action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>skybox/checkout/cart/sidebar/default.phtml</template></action>
+            </block>
+        </reference>
+
+    </default>
+</layout>

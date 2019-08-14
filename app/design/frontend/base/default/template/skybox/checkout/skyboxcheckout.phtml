@@ -1,0 +1,77 @@
+<?php
+
+$_helper = Mage::helper('skyboxinternational/data');
+$_model = Mage::getModel('skyboxcore/standard');
+$_config = Mage::getModel('skyboxcore/config');
+$_checkout = Mage::getModel('skyboxcheckout/api_checkout');
+
+if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) { // Rogged
+    // Calculate height
+    $size = 0;
+
+    $UserTemporal = "1";
+    $CartItemCount = 0;
+
+    if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) {
+    	$cart = $_config->getSession()->getCartSkybox();
+    	if (!empty($cart)) {
+    		$UserTemporal = $cart->{'UserTemporal'};
+            $CartItemCount = intval($cart->{'CartItemCount'});
+            for ($i = 1; $i <= $CartItemCount; $i++) {
+                $size = $size + 50;
+            }
+    	}
+    }
+
+
+    $merchant = $_helper->getMerchantCode();
+    $storeId = $_helper->getStoreId();
+    $cartId = $_helper->getCartId();
+    $guid = $_model->getGuidApi();
+    $urlSuccess = Mage::getUrl("skbcheckout/international/success");
+    $urlConfirm = Mage::getUrl("skbcheckout/international");
+    $token = $_model->AuthenticateService()->getAuthorizedToken();
+
+    $url = $_helper->getSkyboxUrlMain() . "WebForms/Checkout/APICheckout.aspx"; //$_config->skyboxDefaultUrl . "WebForms/Checkout/APICheckout.aspx";
+    $url .= "?token=" . $token;
+    $url .= "&GuiId=" . $guid;
+    $url .= "&merchant=" . $merchant;
+    $url .= "&idCart=" . $cartId;
+    $url .= "&idStore=" . $storeId;
+    $url .= "&UrlC=" . $urlConfirm;// "http://magento.skynet.com/magento192/skbcheckout/international";
+    $url .= "&paypal=" . $_GET["paypal"];
+    $url .= "&UrlR=" . $urlSuccess;
+
+    if($size == 0)
+    {
+        $cart = Mage::getSingleton('checkout/session')->getQuote();
+        foreach ($cart->getAllItems() as $item) {
+            $size = $size + 50;
+        }  
+    }
+
+
+    if($size == 0)
+        $size = 100;
+
+    $height = (($UserTemporal == "1") ? 1400 : 900) + $size;
+    $height=2000;
+    ?>
+        <style type="text/css">
+            #iframe_skybox_checkout {
+                width: 100%;
+                height: <?php echo $height; ?>px;
+            }
+        </style>
+
+    <?php
+    echo '<iframe id="iframe_skybox_checkout" src="' . $url . '" frameborder="0" scrolling="no" / >';
+    echo '<br/>$UserTemporal:' . $UserTemporal;
+    ?>
+<?php
+// ----- Rogged -----
+}else{
+    Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl("checkout/onepage"));
+}
+// ----- ----- -----
+?>
