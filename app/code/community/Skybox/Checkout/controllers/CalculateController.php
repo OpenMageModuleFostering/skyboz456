@@ -36,7 +36,7 @@ class Skybox_Checkout_CalculateController extends Mage_Core_Controller_Front_Act
                 //Mage::log(print_r($request, true), null, 'cart.log', true);
             }
 
-            /* $productAPI Skybox_Catalog_Model_Api_Product */
+            /** @var Skybox_Catalog_Model_Api_Product $productAPI */
             $productAPI = Mage::getModel('skyboxcatalog/api_product');
 
             /* $product Mage_Catalog_Model_Product */

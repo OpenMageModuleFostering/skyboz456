@@ -53,7 +53,7 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
         $callToSkyBox = $session->getData("callToSkyBox");
 
-        Mage::log($callToSkyBox, null, 'gary.log', true);
+        //Mage::log($callToSkyBox, null, 'local.log', true);
         $initialize = $this->_getConfig()->getSession()->getCartSkybox();
         if (!empty($initialize) && (!$callToSkyBox)) {
             $response = $initialize;
@@ -61,6 +61,8 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
             $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
             $session->setData("callToSkyBox", false);
         }
+        $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+        $session->setData("callToSkyBox", false);
         /**
          * only one time for call to service end
          */

@@ -432,7 +432,7 @@
     <default>
         <carriers>
             <skyboxcheckout_shipping>
-                <active>1</active>
+                <active>0</active>
                 <model>skyboxcheckout/carrier</model>
                 <title>SkyboxCheckout Method</title>
                 <price>0</price>

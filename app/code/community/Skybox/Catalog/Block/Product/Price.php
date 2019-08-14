@@ -4,14 +4,12 @@
  *
  * @category    Mage
  * @package     Skybox_Catalog
- * @copyright   Copyright (c) 2014 Skybox Checkout. (http://www.skyboxcheckout.com)
+ * @copyright   Copyright (c) 2014 - 2017 Skybox Checkout. (http://www.skyboxcheckout.com)
  */
 
 /**
  *
- * Product price Block
- *
- * @author      César Tapia M. <ctapia@skyworldint.com>
+ * Product Price Block
  */
 class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Price
 {
@@ -76,23 +74,28 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
      */
     public function _toHtml()
     {
-        //echo "locationAllow: ".$this->_getApi()->getLocationAllow();
-//        $activation = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
         $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
 
         if (!$activation) {
             return '';
         }
+        //$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
         $typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
         //Mage::log(print_r('product\Price::_toHtml', true), null, 'tracer.log', true);
-        if($this->_getApi()->getLocationAllow()  && ($typeIntegration!=3)) { // Rogged
+        if ($this->_getApi()->getLocationAllow() && ($typeIntegration != 3)) {
             if ($this->_getApi()->getErrorAuthenticate() && !$this->_getApi()->getLocationAllow() && $this->_getApi()->HasError()) {
                 return '';
             } elseif ($this->_getApi()->HasError()) {
                 //$error_code = $this->_getApi()->getStatusCode();
                 $message = $this->_getApi()->getStatusMessage();
+
+                if ($this->_getApi()->_getApi()->ErrorRatesNotFound()) {
+                    $message = $this->_getApi()->_getApi()->getErrorRatesNotFoundMessage($this->getLanguageId());
+                    return '<div style="color:#FF0000;">' . $message . '</div>';
+                }
+
+                // return '<div style="color:#FF0000;">' . $message . '</div>';
                 return '';
-//                return '<div style="color:#FF0000;">' . $message . '</div>';
             }
 
             /* @var $product Mage_Catalog_Model_Product */
@@ -118,7 +121,7 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
                     return '';
                 }*/
 
-                if(Mage::registry('current_product')) {
+                if (Mage::registry('current_product')) {
                     return "";
                 }
 
@@ -153,31 +156,36 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
         $type = $product->getTypeId();
         //Mage::log(print_r('product\Price: '.$type, true), null, 'tracer.log', true);
 
-        if (Mage::registry('current_category')){
-            /*Async Ini*/
-            $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
-            $skyboxPrecio = $session->getData("skyBox");
-            /*
-                    if($product->getTypeId() == "simple"){
-                        $parentIds = Mage::getModel('catalog/product_type_grouped')->getParentIdsByChild($product->getId());
-                        if(!$parentIds)
-                            $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-                        if(isset($parentIds[0])){
-                            $parent = Mage::getModel('catalog/product')->load($parentIds[0]);
-                            // do stuff here
-                        }
-                    }*/
-            $template = $skyboxPrecio[$product->getId()];
+        if (Mage::registry('current_category') and (!(Mage::registry('current_product')))) {
+            /**
+             * Apply multiple calculate start
+             * When: is different to product detail and you are on catalog category
+             */
             $template = '<div class="skybox-price-set" product-id="' . $product->getId() . '" id="product-' . $product->getId() . '"></div>';
-            /*Async End*/
+            /*
+                if($product->getTypeId() == "simple"){
+                    $parentIds = Mage::getModel('catalog/product_type_grouped')->getParentIdsByChild($product->getId());
+                    if(!$parentIds)
+                        $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+                    if(isset($parentIds[0])){
+                        $parent = Mage::getModel('catalog/product')->load($parentIds[0]);
+                        // do stuff here
+                    }
+                }*/
+
+            /**
+             * Apply multiple calculate end
+             */
         } else {
             switch ($type) {
                 case 'simple':
-                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
+                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(),
+                        $product->getTypeId())
                         ->GetTemplateProduct();
                     break;
                 case 'configurable':
-                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
+                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(),
+                        $product->getTypeId())
                         ->GetTemplateProduct();
                     break;
                 case 'bundle':
@@ -217,5 +225,18 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
 
         //substr_replace($priceHtml, $extraHtml, strpos($priceHtml, $htmlToInsertAfter)+strlen($htmlToInsertAfter),0);
         return $extraHtml;
+    }
+
+
+    /**
+     * Return the Language Id
+     * @return int
+     */
+    private function getLanguageId()
+    {
+        $_config = Mage::getModel('skyboxcore/config');
+        $cart = $_config->getSession()->getCartSkybox();
+        $id = $cart->{'LanguageId'};
+        return intval($id);
     }
 }

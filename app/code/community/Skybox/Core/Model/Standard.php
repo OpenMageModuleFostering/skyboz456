@@ -57,7 +57,7 @@ class Skybox_Core_Model_Standard
     }
 
     /* @return Skybox_Core_Model_Api_Restful */
-    protected function _getApi()
+    public function _getApi()
     {
         if (null === $this->_api) {
             $this->_api = Mage::getModel($this->_apiType)->setConfigObject($this->_config);
@@ -168,6 +168,11 @@ class Skybox_Core_Model_Standard
     public function getStatusMessage()
     {
         return $this->_api->getStatusMessage();
+    }
+
+    public function getCssVersion()
+    {
+        return$this->_api->getCssVersion();
     }
 
     /**

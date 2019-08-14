@@ -70,4 +70,9 @@ class Skybox_International_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return Mage::getSingleton('checkout/session')->getQuoteId();
     }
+
+    public function getCssVersion()
+    {
+        return Mage::getModel('skyboxcatalog/api_product')->getCssVersion();
+    }
 }

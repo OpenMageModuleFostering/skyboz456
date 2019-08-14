@@ -16,7 +16,8 @@
  */
 class Skybox_Catalog_Model_Observer
 {
-    private function getActive() {
+    private function getActive()
+    {
 //        $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
         $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
         return $value;
@@ -25,7 +26,9 @@ class Skybox_Catalog_Model_Observer
     public function hookToControllerActionPreDispatch($observer)
     {
         $active = $this->getActive();
-        if (!$active) { return; }
+        if (!$active) {
+            return;
+        }
 
         //Mage::log('router tivoli: '.$observer->getEvent()->getControllerAction()->getFullActionName(), null, 'tracer.log', true);
         if (($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add')) {
@@ -38,7 +41,9 @@ class Skybox_Catalog_Model_Observer
     public function hookToControllerActionPostDispatch($observer)
     {
         $active = $this->getActive();
-        if (!$active) { return; }
+        if (!$active) {
+            return;
+        }
 
         //Mage::log('router tivoli: '.$observer->getEvent()->getControllerAction()->getFullActionName(), null, 'tracer.log', true);
         if (($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add')) {
@@ -51,7 +56,9 @@ class Skybox_Catalog_Model_Observer
     public function hookToAddToCartBefore($observer)
     {
         $active = $this->getActive();
-        if (!$active) { return; }
+        if (!$active) {
+            return;
+        }
 
         //Mage::log('function hookToAddToCartBefore: ',null, 'tracer.log', true);
         $key = Mage::getSingleton('core/session')->getFormKey();
@@ -62,10 +69,12 @@ class Skybox_Catalog_Model_Observer
     public function hookToAddToCartAfter($observer)
     {
         $active = $this->getActive();
-        if (!$active) { return; }
+        if (!$active) {
+            return;
+        }
 
         $request = $observer->getEvent()->getRequest()->getParams();
-        Mage::log("hookToAddToCartAfter ".print_r($request,true)." is added to cart.", null, 'cart.log', true);
+        Mage::log("hookToAddToCartAfter " . print_r($request, true) . " is added to cart.", null, 'cart.log', true);
     }
 
     public function injectTab(Varien_Event_Observer $observer)
@@ -93,8 +102,8 @@ class Skybox_Catalog_Model_Observer
                 $block->addTab('custom_tab', array(
                     'label' => 'SkyboxCheckout',
                     'content' => $block->getLayout()
-                            ->createBlock('skyboxcatalog/catalog_category_tab_skyboxcheckout')
-                            ->toHtml()
+                        ->createBlock('skyboxcatalog/catalog_category_tab_skyboxcheckout')
+                        ->toHtml()
                 ));
             }
         }
@@ -159,7 +168,7 @@ class Skybox_Catalog_Model_Observer
         return $this;
     }
 
-    public function  setCommodityInForm(Varien_Event_Observer $observer)
+    public function setCommodityInForm(Varien_Event_Observer $observer)
     {
         // catalog_product_prepare_save
 
@@ -178,8 +187,10 @@ class Skybox_Catalog_Model_Observer
 
         // If commodity already set
         if ($commodity) {
+            Mage::log('commodity_exist_true', null, 'skyboxcheckout.log', true);
             return $this;
         } else {
+            Mage::log('commodity_exist_false', null, 'skyboxcheckout.log', true);
             $categoryIds = $product->getCategoryIds();
 
             if (empty($categoryIds)) {
@@ -215,8 +226,6 @@ class Skybox_Catalog_Model_Observer
 
     private function _bulk_commodities($categoryIds, $value, $allProducts = true)
     {
-        Mage::log("Apply Bulk ...", null, 'skyboxcheckout.log', true);
-
         /* @var $collection Mage_Catalog_Model_Product */
         $collection = Mage::getModel('catalog/product')
             ->getCollection()
@@ -225,19 +234,31 @@ class Skybox_Catalog_Model_Observer
             ->addAttributeToFilter('category_id', array('in' => $categoryIds));
 
         if (!$allProducts) {
-            //$collection->addAttributeToFilter('skybox_category_id', '');
             $collection->addAttributeToFilter('skybox_category_id', array('null' => true));
         }
 
-        //Mage::log($collection->getSelectSql(true), null, 'skyboxcheckout.log', true);
         $count = count($collection);
 
         foreach ($collection as $product) {
             try {
-                Mage::log("Update Product: " . $product->getId(), null, 'skyboxcheckout.log', true);
-                $product->setData('skybox_category_id', $value);
-                $product->getResource()->save($product);
-            } catch (Exception $ex) {
+                /** @var Mage_Catalog_Model_Product $product */
+                $product = $product;
+
+                if ($product->getTypeId() == 'configurable') {
+                    /** @var Mage_Catalog_Model_Product $productChild */
+//                    $childProducts = Mage::getModel('catalog/product_type_configurable')->getUsedProducts(null, $product);
+                    $childProducts = $product->getTypeInstance()->getUsedProductIds();
+                    foreach ($childProducts as $key => $child) {
+                        $productChild = Mage::getModel('catalog/product')->load($child);
+                        $productChild->setData('skybox_category_id', $value);
+                        $productChild->getResource()->save($productChild);
+                    }
+                } else {
+                    // Only setData if product->getTypeId() is 'simple'
+                    $product->setData('skybox_category_id', $value);
+                    $product->getResource()->save($product);
+                }
+            } catch (\Exception $ex) {
                 Mage::log("saveCategory() Exception: " . $ex->getMessage(), null, 'skyboxcheckout.log', true);
             }
         }

@@ -187,7 +187,7 @@ class Skybox_Checkout_Model_Observer
         if ($typeIntegration==3) {
             $allowRunByIntegration3 = false;
         }
-        //Mage::log("Call true22: changeQuoteAddressSkybox", null, 'gary.log', true);
+        //Mage::log("Call true22: changeQuoteAddressSkybox", null, 'local.log', true);
         /**
          * Integration 3 end, show price shop in cart*
          */

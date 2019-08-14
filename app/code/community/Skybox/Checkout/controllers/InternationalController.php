@@ -29,8 +29,9 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
 
     public function successAction()
     {
-        Mage::log("Call true: successAction limpiar carro", null, 'gary.log', true);
-        Mage::getSingleton('checkout/cart')->truncate()->save();
+        // Mage::log("Call true: successAction limpiar carro", null, 'local.log', true);
+        // Mage::getSingleton('checkout/cart')->truncate()->save();
+        Mage::getSingleton('checkout/cart')->truncateMgCart()->save();
 
         $_config = Mage::getModel('skyboxcore/config');
         $cart = $_config->getSession()->getCartSkybox();
