@@ -520,8 +520,6 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function removeItem($itemId)
     {
-        Mage::log('Skybox rulez! -  removeItem !!', null, 'bueyada.log', true);
-
         /**
          * only one time for call to service start - Active
          * when do remove
@@ -564,8 +562,6 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function updateItems($data)
     {
-        Mage::log('Skybox updateItems!!!', null, 'bueyada.log', true);
-
         /**
          * only one time for call to service start - Active
          * when do remove
@@ -671,8 +667,6 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function updateItem($itemId, $requestInfo = null, $updatingParams = null)
     {
-        Mage::log('Skybox rulez! - updateItem !!', null, 'bueyada.log', true);
-
         if (!$this->isEnable()) {
             $result = parent::updateItem($itemId, $requestInfo, $updatingParams);
             return $result;

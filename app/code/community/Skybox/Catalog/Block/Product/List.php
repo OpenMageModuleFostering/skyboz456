@@ -13,102 +13,6 @@
 class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
 {
     /**
-     * Default toolbar block name
-     *
-     * @var string
-     */
-    protected $_defaultToolbarBlock = 'catalog/product_list_toolbar';
-
-    /**
-     * Product Collection
-     *
-     * @var Mage_Eav_Model_Entity_Collection_Abstract
-     */
-    protected $_productCollection;
-
-    /**
-     * Retrieve loaded category collection
-     *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
-     */
-    protected function _getProductCollection()
-    {
-        if (is_null($this->_productCollection)) {
-            $layer = $this->getLayer();
-            /* @var $layer Mage_Catalog_Model_Layer */
-            if ($this->getShowRootCategory()) {
-                $this->setCategoryId(Mage::app()->getStore()->getRootCategoryId());
-            }
-
-            // if this is a product view page
-            if (Mage::registry('product')) {
-                // get collection of categories this product is associated with
-                $categories = Mage::registry('product')->getCategoryCollection()
-                    ->setPage(1, 1)
-                    ->load();
-                // if the product is associated with any category
-                if ($categories->count()) {
-                    // show products from this category
-                    $this->setCategoryId(current($categories->getIterator()));
-                }
-            }
-
-            $origCategory = null;
-            if ($this->getCategoryId()) {
-                $category = Mage::getModel('catalog/category')->load($this->getCategoryId());
-                if ($category->getId()) {
-                    $origCategory = $layer->getCurrentCategory();
-                    $layer->setCurrentCategory($category);
-                    $this->addModelTags($category);
-                }
-            }
-            $this->_productCollection = $layer->getProductCollection();
-
-            $this->prepareSortableFieldsByCategory($layer->getCurrentCategory());
-
-            if ($origCategory) {
-                $layer->setCurrentCategory($origCategory);
-            }
-        }
-
-        return $this->_productCollection;
-    }
-
-    /**
-     * Get catalog layer model
-     *
-     * @return Mage_Catalog_Model_Layer
-     */
-    public function getLayer()
-    {
-        $layer = Mage::registry('current_layer');
-        if ($layer) {
-            return $layer;
-        }
-        return Mage::getSingleton('catalog/layer');
-    }
-
-    /**
-     * Retrieve loaded category collection
-     *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
-     */
-    public function getLoadedProductCollection()
-    {
-        return $this->_getProductCollection();
-    }
-
-    /**
-     * Retrieve current view mode
-     *
-     * @return string
-     */
-    public function getMode()
-    {
-        return $this->getChild('toolbar')->getCurrentMode();
-    }
-
-    /**
      * Retrieve API Product
      *
      * @return Skybox_Catalog_Model_Api_Product
@@ -121,51 +25,16 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
         return $this->_api;
     }
 
-    public function getUrlService($product)
-    {
-
-        $type = $product->getTypeId();
-        switch ($type) {
-            case 'simple':
-                $template = $this->_getApi()->getUrl($product->getId(), null, $product->getFinalPrice(),
-                    $product->getTypeId());
-                break;
-            case 'configurable':
-                $template = $this->_getApi()->getUrl($product->getId(), null, $product->getFinalPrice(),
-                    $product->getTypeId());
-                break;
-            case 'bundle':
-                $template = $this->_getApi()->getUrl($product, null, $product->getFinalPrice(), 'simple');
-                break;
-        }
-        return $template;
-    }
-
-    private function isEnable()
-    {
-        $isModuleEnable = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
-        if (!$isModuleEnable) {
-            return false;
-        }
-
-        /** @var Skybox_Core_Helper_Allow $allowHelper */
-        $allowHelper = Mage::helper('skyboxcore/allow');
-
-        if (!$allowHelper->isPriceEnabled()) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * Need use as _prepareLayout - but problem in declaring collection from
      * another block (was problem with search result)
      */
     protected function _beforeToHtml()
     {
+        $result = parent::_beforeToHtml();
+
         if (!$this->isEnable()) {
-            return parent::_beforeToHtml();
+            return $result;
         }
 
         $api_checkout = Mage::getModel('skyboxcheckout/api_checkout');
@@ -183,7 +52,8 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
         $multiCalculate = 1;
 
         try {
-            $products = $this->_getProductCollection();
+            // $products = $this->_getProductCollection();
+            $products = $this->getToolbarBlock()->getCollection();
 
             foreach ($products as $prod) {
                 $product = Mage::getModel('catalog/product')->load($prod->getId());
@@ -204,39 +74,32 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
         Mage::register('skybox_multicalculate', $multiCalculate);
         // Mage::registry('skybox_multicalculate');
 
-        return parent::_beforeToHtml();
+        return $result;
     }
 
     /**
-     * @deprecated
+     * @param $product
+     * @return array|string
      */
-    public function getTemplateServicio($objectProduct, $template)
+    public function getUrlService($product)
     {
-        /*2step execute get button template*/
+        $type = $product->getTypeId();
+        $template = '';
 
-        /*var_dump($a->getHtmlTemplateButton());exit;*//*3 step call calculate*/;
-        if (1) {
-
-            /*$objectProduct = json_decode($objectProduct);
-            $objectProduct = json_decode(json_encode($objectProduct), true);*/
-            //var_dump($objectProduct);exit;
-            foreach ($objectProduct as $key => $value) {
-                /*echo "==>".$key."<====";
-                echo "==>".$value."<====";exit;-*/
-                $template = str_replace('{' . $key . '}', $value, $template);
-            }
-
-            // Just for {Block} crap
-            $template = str_replace('{Block}', '', $template);
-            /*echo "<hit>";
-            echo($template); exit;
-            echo "</hit>";*/
-            /*echo $template; exit;*/
-            return $template;
+        switch ($type) {
+            case 'simple':
+                $template = $this->_getApi()->getUrl($product->getId(), null, $product->getFinalPrice(),
+                    $product->getTypeId());
+                break;
+            case 'configurable':
+                $template = $this->_getApi()->getUrl($product->getId(), null, $product->getFinalPrice(),
+                    $product->getTypeId());
+                break;
+            case 'bundle':
+                $template = $this->_getApi()->getUrl($product, null, $product->getFinalPrice(), 'simple');
+                break;
         }
-        //exit("debug si es que llega");
-        /*var_dump($a); exit;
-        var_dump(Mage::getSingleton('skyboxcore/session')); exit;--*/
+        return $template;
     }
 
     /**
@@ -266,104 +129,24 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
     }
 
     /**
-     * Retrieve Toolbar block
+     * is Enable?
      *
-     * @return Mage_Catalog_Block_Product_List_Toolbar
+     * @return bool
      */
-    public function getToolbarBlock()
+    private function isEnable()
     {
-        if ($blockName = $this->getToolbarBlockName()) {
-            if ($block = $this->getLayout()->getBlock($blockName)) {
-                return $block;
-            }
-        }
-        $block = $this->getLayout()->createBlock($this->_defaultToolbarBlock, microtime());
-        return $block;
-    }
-
-    /**
-     * Retrieve additional blocks html
-     *
-     * @return string
-     */
-    public function getAdditionalHtml()
-    {
-        return $this->getChildHtml('additional');
-    }
-
-    /**
-     * Retrieve list toolbar HTML
-     *
-     * @return string
-     */
-    public function getToolbarHtml()
-    {
-        return $this->getChildHtml('toolbar');
-    }
-
-    public function setCollection($collection)
-    {
-        $this->_productCollection = $collection;
-        return $this;
-    }
-
-    public function addAttribute($code)
-    {
-        $this->_getProductCollection()->addAttributeToSelect($code);
-        return $this;
-    }
-
-    public function getPriceBlockTemplate()
-    {
-        return $this->_getData('price_block_template');
-    }
-
-    /**
-     * Retrieve Catalog Config object
-     *
-     * @return Mage_Catalog_Model_Config
-     */
-    protected function _getConfig()
-    {
-        return Mage::getSingleton('catalog/config');
-    }
-
-    /**
-     * Prepare Sort By fields from Category Data
-     *
-     * @param Mage_Catalog_Model_Category $category
-     * @return Mage_Catalog_Block_Product_List
-     */
-    public function prepareSortableFieldsByCategory($category)
-    {
-        if (!$this->getAvailableOrders()) {
-            $this->setAvailableOrders($category->getAvailableSortByOptions());
-        }
-        $availableOrders = $this->getAvailableOrders();
-        if (!$this->getSortBy()) {
-            if ($categorySortBy = $category->getDefaultSortBy()) {
-                if (!$availableOrders) {
-                    $availableOrders = $this->_getConfig()->getAttributeUsedForSortByArray();
-                }
-                if (isset($availableOrders[$categorySortBy])) {
-                    $this->setSortBy($categorySortBy);
-                }
-            }
+        $isModuleEnable = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        if (!$isModuleEnable) {
+            return false;
         }
 
-        return $this;
-    }
+        /** @var Skybox_Core_Helper_Allow $allowHelper */
+        $allowHelper = Mage::helper('skyboxcore/allow');
 
-    /**
-     * Retrieve block cache tags based on product collection
-     *
-     * @return array
-     */
-    public function getCacheTags()
-    {
-        return array_merge(
-            parent::getCacheTags(),
-            $this->getItemsTags($this->_getProductCollection())
-        );
+        if (!$allowHelper->isPriceEnabled()) {
+            return false;
+        }
+
+        return true;
     }
 }

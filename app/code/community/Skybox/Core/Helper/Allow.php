@@ -210,7 +210,7 @@ class Skybox_Core_Helper_Allow extends Mage_Core_Helper_Abstract
     /*
      * Get LocationAllow
      */
-    private function getLocationAllow()
+    public function getLocationAllow()
     {
         if ($this->_locationAllow == null) {
             $_checkout = Mage::getModel('skyboxcheckout/api_checkout');

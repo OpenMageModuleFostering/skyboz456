@@ -295,7 +295,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
 
                 // @todo: Rewrite custom Quote and LocationAllow logic.
                 if ($product_api->getLocationAllow() == 0) {
-                    Mage::log("The country is not allow", null, 'bueyada.log', true);
+                    // Mage::log("The country is not allow", null, 'bueyada.log', true);
                     $item->setOriginalCustomPrice($productModel->getPrice());
                 }
                 //$item->setOriginalCustomPrice($product_api->getPrice());
@@ -309,12 +309,17 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
 
         $quote->save();
 
+        $_getSession = Mage::getSingleton('checkout/session');
+        $_getSession->setCartWasUpdated(true);
+
         // @note: Force to load Home Page due cache issue. (minicart)
         if (strpos($return_url, 'force_reload')) {
             $return_url = str_replace('force_reload', '', $return_url);
+
             /** @var Skybox_Core_Model_Config $config */
             $config = Mage::getModel("skyboxcore/config");
-            $config->getSession()->setChangeCountryHomePage(true);
+            $forceReload = 1;
+            $config->getSession()->setChangeCountryHomePage($forceReload);
         }
 
         //$this->getResponse()->setRedirect($return_url);

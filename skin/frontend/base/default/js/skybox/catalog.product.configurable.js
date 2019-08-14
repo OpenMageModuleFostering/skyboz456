@@ -1,6 +1,6 @@
 /**************************** CONFIGURABLE PRODUCT **************************/
 
-if (typeof Product != 'undefined') {
+if (typeof Product !== 'undefined') {
 
     /*
      * Note: We disabled this jQuery function, because we need to support IE older versions.
@@ -44,8 +44,8 @@ if (typeof Product != 'undefined') {
     var SkyboxOptionsPrice = Class.create(Product.OptionsPrice, {
 
         makeAjaxCall: function () {
-            document.getElementsByClassName('price-info')[0].innerHTML = "<img src='https://cdn.shopify.com/s/files/1/1976/9429/t/1/assets/ajax-loader.gif?10083406412996855781'/>";
-            console.log("Price: " + this.myProductPrice);
+            document.getElementsByClassName('price-info')[0].innerHTML = "<img src='" + LOADING_IMAGE + "'/>";
+            // console.log("Price: " + this.myProductPrice);
             var request = $('product_addtocart_form').serialize();
 
             new Ajax.Request(this.url, {
@@ -68,7 +68,7 @@ if (typeof Product != 'undefined') {
                     }
 
                     if (price_info) {
-                        //console.log('price-info');
+                        // console.log('price-info');
                         $$('.price-info')[0].innerHTML = response;
                     }
 
@@ -80,53 +80,53 @@ if (typeof Product != 'undefined') {
 
         reload: function ($super) {
             $super();
+            if (parseInt(IS_SKYBOX_VISIBLE) === 1) {
 
-            var price;
-            var formattedPrice;
-            var optionPrices = this.getOptionPrices();
-            var nonTaxable = optionPrices[1];
-            var optionOldPrice = optionPrices[2];
-            var priceInclTax = optionPrices[3];
-            optionPrices = optionPrices[0];
+                var price;
+                var formattedPrice;
+                var optionPrices = this.getOptionPrices();
+                var nonTaxable = optionPrices[1];
+                var optionOldPrice = optionPrices[2];
+                var priceInclTax = optionPrices[3];
+                optionPrices = optionPrices[0];
 
-            // ...
+                // ...
 
-            var _productPrice;
-            var _plusDisposition;
-            var _minusDisposition;
-            var _priceInclTax;
+                var _productPrice;
+                var _plusDisposition;
+                var _minusDisposition;
+                var _priceInclTax;
 
-            _productPrice = this.productPrice;
-            _plusDisposition = this.plusDisposition;
-            _minusDisposition = this.minusDisposition;
+                _productPrice = this.productPrice;
+                _plusDisposition = this.plusDisposition;
+                _minusDisposition = this.minusDisposition;
 
-            _priceInclTax = priceInclTax;
+                _priceInclTax = priceInclTax;
 
-            // ...
+                // ...
 
-            //price = optionOldPrice+parseFloat(_productPrice);
-            price = optionPrices + parseFloat(_productPrice);
-            _priceInclTax += parseFloat(_productPrice) * (100 + this.currentTax) / 100;
+                //price = optionOldPrice+parseFloat(_productPrice);
+                price = optionPrices + parseFloat(_productPrice);
+                _priceInclTax += parseFloat(_productPrice) * (100 + this.currentTax) / 100;
 
-            var tax = price * (this.currentTax / 100);
-            var excl = price;
-            // var incl = excl + tax;
-            var incl = excl;
-            var finalPrice = parseFloat(incl);
+                var tax = price * (this.currentTax / 100);
+                var excl = price;
+                // var incl = excl + tax;
+                var incl = excl;
+                var finalPrice = parseFloat(incl);
 
-            /*console.log('Price incl tax: ' + _priceInclTax);
-            console.log('Origin Tax: ' + this.currentTax);
-            console.log('Tax: ' + tax);
-            console.log('price reload: ' + price);
-            console.log('Price + Tax: ' + incl);*/
+                // console.log('Price incl tax: ' + _priceInclTax);
+                //  console.log('Origin Tax: ' + this.currentTax);
+                //  console.log('Tax: ' + tax);
+                //  console.log('price reload: ' + price);
+                //  console.log('Price + Tax: ' + incl);
 
-            this.url = SKYBOX_OPTIONS_PRICE_URL;
-            this.myProductPrice = finalPrice;
-            this.makeAjaxCall();
+                this.url = SKYBOX_OPTIONS_PRICE_URL;
+                this.myProductPrice = finalPrice;
+                this.makeAjaxCall();
+            }
         }
-
     });
-
     Product.OptionsPrice = SkyboxOptionsPrice;
 }
 

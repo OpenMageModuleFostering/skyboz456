@@ -87,11 +87,7 @@ endif;
             var url = SkyBoxUrlClient + id + ".html";
             var content = jQuery.get(url, function (data) {
                 jQuery("#" + dataId).html(data);
-                /*return data;*/
             });
-//            console.log("URL SkyBoxUrlClient: " +url);
-            //console.log(url);
-            /*console.log(content);*/
         });
     });
 
@@ -190,33 +186,6 @@ endif;
             }
         }
 
-        var createCookie = function(name, value, days) {
-            var expires;
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toGMTString();
-            } else {
-                expires = "";
-            }
-            document.cookie = name + "=" + value + expires + "; path=/";
-        };
-
-        function getCookie(c_name) {
-            if (document.cookie.length > 0) {
-                c_start = document.cookie.indexOf(c_name + "=");
-                if (c_start !== -1) {
-                    c_start = c_start + c_name.length + 1;
-                    c_end = document.cookie.indexOf(";", c_start);
-                    if (c_end === -1) {
-                        c_end = document.cookie.length;
-                    }
-                    return unescape(document.cookie.substring(c_start, c_end));
-                }
-            }
-            return "";
-        }
-
         function postMessageIframe() {
             var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
             var eventer = window[eventMethod];
@@ -241,18 +210,6 @@ endif;
 //                popup.showCenter(true);
             }
         }
-        function recalculateHeight() {
-            if(!jQuery.isEmptyObject(popup) && win === 'resync'){
-                var iFrameDOM = $("iframe#selectLocation_content").contents();
-                popupHeight = iFrameDOM.find("body").height()+30;
-                console.log(popupHeight);
-                var _size = getSizeForPopup();
-                popup.setSize(_size.width, _size.height)
-//                popup.updateHeight()s
-//                var fh = document.getElementById('selectLocation_content').contentWindow.document.getElementById('form1')
-            }
-            win = '';
-        }
 
         function browserResize() {
             jQuery(window).resize(function() {
@@ -270,31 +227,32 @@ endif;
             return {width: _width, height: popupHeight};
         }
 
-        $(".skx_position_option_country").unbind().click(function(){
+        $(".skx_position_option_country").unbind().click(function () {
             goToLocation();
         });
-        $(".skx_banner_image_account").unbind().click(function(){
+
+        $(".skx_banner_image_account").unbind().click(function () {
             goToInitializeSession();
+        });
+
+        $(".skx_banner_image_car").unbind().click(function () {
+            goToCart();
+        });
+
+        $(".skx_banner_image_tracking").unbind().click(function () {
+            goToTrackingLocation();
+        });
+
+        $("#link_choise_country").unbind().click(function () {
+            goToCart();
         });
 
         $(document).ready(function () {
             widthPage = $(window).width();
             heightPage = $(window).height();
-            $(".skx_banner_image_car").click(goToCart);
-//            $(".skx_position_option_country").click(goToLocation);
-//            $(".skx_banner_image_account").click(goToInitializeSession);
-            $(".skx_banner_image_tracking").click(goToTrackingLocation);
-            $("#link_choise_country").click(goToCart);
             postMessageIframe();
             loadIframe();
             browserResize();
-
-            <?php if(Mage::getBlockSingleton('page/html_header')->getIsHomePage() && $change_country == true) : ?>
-            if ( !getCookie('tivoli_latam_homepage') ) {
-                createCookie('tivoli_latam_homepage', 1);
-                //goToLocation();
-            }
-            <?php endif; ?>
         });
     })(jQuery);
 </script>
@@ -362,7 +320,9 @@ if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) : // 
     $height = (($UserTemporal == "1") ? 1400 : 900) + $size;
     $height = 2500;
     ?>
-    <iframe id="iframe_skybox_checkout" src="<?php echo $url; ?>" frameborder="0" scrolling="no"></iframe>
+    <div class="div_iframe_skybox_checkout">
+        <iframe id="iframe_skybox_checkout" src="<?php echo $url; ?>" frameborder="0" scrolling="no"></iframe>
+    </div>
     <script type="text/javascript">
         jQuery(document).ready(function() {
             var height = <?php echo $height; ?>;
@@ -387,7 +347,6 @@ endif;
     setTimeout(function(){
         var location_pathname = window.location.pathname.split('/');
         var skx_bar = document.getElementsByClassName('skx-bar-text');
-        console.log("location_pathname::::", location_pathname);
         try{
             if(location_pathname[2] === "international") skx_bar[0].style.display = "none";
         }

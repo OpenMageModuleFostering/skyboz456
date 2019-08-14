@@ -3,7 +3,7 @@
     <modules>
         <Skybox_Services>
             <active>true</active>
-            <version>1.2.4</version>
+            <version>1.2.6.2</version>
             <codePool>community</codePool>
         </Skybox_Services>
     </modules>

@@ -38,45 +38,56 @@ class Skybox_Checkout_CalculateController extends Mage_Core_Controller_Front_Act
 
             /** @var Skybox_Catalog_Model_Api_Product $productAPI */
             $productAPI = Mage::getModel('skyboxcatalog/api_product');
+            $locationAllow = $productAPI->getLocationAllow();
 
-            /* $product Mage_Catalog_Model_Product */
-            $product = Mage::getModel('catalog/product')->load($productId);
-            $type = $product->getTypeId();
-            $template = null;
-            //Mage::log(print_r('calculateController: '.$type, true), null, 'tracer.log', true);
-            switch ($type) {
-                case 'simple':
-                    $template = $productAPI->CalculatePrice($product->getId(), null, $product->getFinalPrice(), 'simple')
-                        ->GetTemplateProduct();
-                    break;
-                case 'configurable':
-                    $template = $productAPI->CalculatePrice($product->getId(), null, $price, $product->getTypeId())
-                        ->GetTemplateProduct();
-                    break;
-                case 'bundle':
-                    try {
-                        $template = $productAPI->CalculatePrice($product->getId(), $request, $price, 'bundle')
+            if($locationAllow != "1"){
+//                Mage::log("getLocationAllow:::::[0]". $locationAllow, null, 'data.log', true);
+            }else {
+//                Mage::log("getLocationAllow:::::[1]". $locationAllow, null, 'data.log', true);
+                /* $product Mage_Catalog_Model_Product */
+                $product = Mage::getModel('catalog/product')->load($productId);
+                $type = $product->getTypeId();
+                $template = null;
+                //Mage::log(print_r('calculateController: '.$type, true), null, 'tracer.log', true);
+                switch ($type) {
+                    case 'simple':
+                        Mage::log("catch_exception_pendejerete_simple", null, 'tracerlog.log', true);
+                        $template = $productAPI->CalculatePrice($product->getId(), null, $product->getFinalPrice(),
+                            'simple')
                             ->GetTemplateProduct();
-                    } catch (Exception $e) {
-                        Mage::logException($e);
-                        $template = '';
-                    }
-                    break;
-                default;
-                    $this->_error('Invalid or not supported Product Type.');
-                    break;
+                        break;
+                    case 'configurable':
+                        Mage::log("catch_exception_pendejerete_configurable", null, 'tracerlog.log', true);
+                        $template = $productAPI->CalculatePrice($product->getId(), null, $price, $product->getTypeId())
+                            ->GetTemplateProduct();
+                        break;
+                    case 'bundle':
+                        try {
+                            Mage::log("catch_exception_pendejerete_bundle", null, 'tracerlog.log', true);
+                            $template = $productAPI->CalculatePrice($product->getId(), $request, $price, 'bundle')
+                                ->GetTemplateProduct();
+                        } catch (Exception $e) {
+                            Mage::log("catch_exception_pendejerete", null, 'tracerlog.log', true);
+                            Mage::logException($e);
+                            $template = '';
+                        }
+                        break;
+                    default;
+                        $this->_error('Invalid or not supported Product Type.');
+                        break;
+                }
+
+                $extraHtml = '<div id="skybox-configurable-price-from-'
+                    . $product->getId()
+                    //. $this->getIdSuffix()
+                    . ''
+                    . '">'
+                    . $template
+                    . '</div>'
+                    . '<div style="clear:both"></div>';
+
+                $this->getResponse()->setBody($extraHtml);
             }
-
-            $extraHtml = '<div style="font-weight:bold" id="skybox-configurable-price-from-'
-                . $product->getId()
-                //. $this->getIdSuffix()
-                . ''
-                . '">'
-                . $template
-                . '</p>'
-                . '<div style="clear:both"></div>';
-
-            $this->getResponse()->setBody($extraHtml);
         }
     }
 

@@ -48,13 +48,11 @@ class Skybox_Checkout_Model_Quote_Address_Total_Rmt extends Mage_Sales_Model_Quo
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
-        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        parent::fetch($address);
 
-        if (!$activation) {
+        if (!$this->isEnable()) {
             return $this;
         }
-
-        parent::fetch($address);
 
         $quote = $address->getQuote();
         if (!$quote->isVirtual() && $address->getAddressType() == 'billing') {
@@ -88,5 +86,27 @@ class Skybox_Checkout_Model_Quote_Address_Total_Rmt extends Mage_Sales_Model_Quo
 
         }
         return $this;
+    }
+
+    private function isEnable()
+    {
+        /** @var Skybox_Core_Model_Api_Restful $api_restful */
+        $api_restful = Mage::getModel('skyboxcore/api_restful');
+        $activation = $api_restful->isModuleEnable();
+
+        if (!$activation) {
+            return false;
+        }
+
+        /** @var Skybox_Core_Helper_Allow $allowHelper */
+        $allowHelper = Mage::helper('skyboxcore/allow');
+
+        $locationAllow = $allowHelper->getLocationAllow();
+
+        if (!$locationAllow) {
+            return false;
+        }
+
+        return true;
     }
 }
