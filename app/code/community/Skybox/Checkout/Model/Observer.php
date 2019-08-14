@@ -315,4 +315,16 @@ class Skybox_Checkout_Model_Observer
             }
         }
     }
+
+    public function paymentMethodIsActive(Varien_Event_Observer $observer)
+    {
+        $event = $observer->getEvent();
+        $result = $event->getResult();
+        if ($this->_getApi()->getLocationAllow()) {
+            $result->isAvailable = false;
+        } else {
+            $result->isAvailable = true;
+        }
+
+    }
 }

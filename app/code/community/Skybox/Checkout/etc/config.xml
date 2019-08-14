@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Skybox_Checkout>
-            <version>1.2.6.2</version>
+            <version>1.2.7</version>
             <codePool>community</codePool>
         </Skybox_Checkout>
     </modules>
@@ -221,6 +221,15 @@
             </skyboxcheckout_setup>
         </resources>
         <events>
+            <payment_method_is_active>
+                <observers>
+                    <paymentfilter_payment_method_is_active>
+                        <type>singleton</type>
+                        <class>Skybox_Checkout_Model_Observer</class>
+                        <method>paymentMethodIsActive</method>
+                    </paymentfilter_payment_method_is_active>
+                </observers>
+            </payment_method_is_active>
             <!--controller_front_init_routers>
               <observers>
                 <Skybox_checkout_model_observer>

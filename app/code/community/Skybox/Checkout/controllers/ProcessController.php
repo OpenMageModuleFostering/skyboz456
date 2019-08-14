@@ -11,6 +11,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
 {
     public function indexAction()
     {
+//        Mage::log(":::-----------------------------------:::", null, 'pendejerete.log', true);
         /**
          * only one time for call to service start - Active
          * This always run when you do change country
@@ -21,17 +22,13 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
         /**
          * only one time for call to service end - Active
          */
-
-
         /**
          * Integration 3 start, show price shop in cart*
          */
         $isLocationAllow = false;
         //$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
         $typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
-        if ($typeIntegration == 3) {
-            $isLocationAllow = true;
-        }
+        if ($typeIntegration == 3) $isLocationAllow = true;
         /**
          * Integration 3 end, show price shop in cart*
          */
@@ -42,9 +39,14 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
         $return_url = ($this->getRequest()->getParam('return_url')) ?
             $this->getRequest()->getParam('return_url') :
             Mage::helper('core/url')->getHomeUrl();
+
+//        Mage::log("returnUrl:::". $return_url, null, 'pendejerete.log', true);
+
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         $product_api = Mage::getSingleton('skyboxcatalog/api_product');
-        Mage::log("process", null, 'processcontroller.log', true);
+
+//        Mage::log("product_api:::".print_r($product_api,1), null, 'pendejerete.log', true);
+//        Mage::log("product_api-GetLocationAllow:::".$product_api->getLocationAllow(), null, 'pendejerete.log', true);
 
         /*---------------- Rogged ------------------*/
         $_config = Mage::getModel('skyboxcore/config');
@@ -55,14 +57,18 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
         }
         # check if local skybox shopping cart and skybox-checkout match
         $differentqty = 0;
-        $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
+//        $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
+
 //        Mage::log('entro getAllItems $CartItemCount',null,'tracer.log',true);
 //        Mage::log((int)$quote->getItemsQty() .'-'.$CartItemCount,null,'tracer.log',true);
         if (!$isLocationAllow) {
-            if ((int)$quote->getItemsQty() != $CartItemCount && $api_mproduct->getLocationAllow()) {
+//            Mage::log('entro !$isLocationAllow::: ',null,'tracer.log',true);
+            if ((int)$quote->getItemsQty() != $CartItemCount && $product_api->getLocationAllow()) {
                 $differentqty = 1;
             }
         }
+
+//        Mage::log("product_api-QuoteAllItems:::".print_r($quote->getAllItems(),1), null, 'pendejerete.log', true);
 
         /*-----------------------------------------*/
         foreach ($quote->getAllItems() as $item) {
@@ -70,6 +76,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             $parentItemId = $item->getParentItemId();
             /*---------------- Rogged ------------------*/
             if ($differentqty == 1) {
+//                Mage::log("differentqty:::", null, 'pendejerete.log', true);
                 $cart = Mage::getModel('skyboxcheckout/cart');
 
                 if ($item->getProductType() === 'simple' && !$parentItem) {
@@ -83,14 +90,19 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
                 /* end  */
 
                 if ($item->getProductType() === 'simple' && $parentItem) {
-                    $paramsRequest = array();
-                    $productParentId = Mage::getModel('catalog/product_type_configurable')
+                    $paramsRequest  = array();
+                    $productParentId= Mage::getModel('catalog/product_type_configurable')
                         ->getParentIdsByChild($item->getProductId());
-                    $productParentId = $productParentId[0];
-                    $productModel = Mage::getModel('catalog/product')->load($productParentId);
-                    $_typeInstance = $productModel->getTypeInstance(true);
-                    $_children = $_typeInstance->getUsedProducts(null, $productModel);
-                    $_attributes = $_typeInstance->getUsedProductAttributes($productModel);
+                    $productParentId= $productParentId[0];
+
+//                    Mage::log("productParentId:::". print_r($productParentId), null, 'pendejerete.log', true);
+//                    Mage::log("productParentId[0]:::". $productParentId, null, 'pendejerete.log', true);
+
+                    $productModel   = Mage::getModel('catalog/product')->load($productParentId);
+                    $_typeInstance  = $productModel->getTypeInstance(true);
+                    $_children      = $_typeInstance->getUsedProducts(null, $productModel);
+                    $_attributes    = $_typeInstance->getUsedProductAttributes($productModel);
+
                     foreach ($_children as $_child) {
                         if ($_child->entity_id == $item->getProductId()) {
                             $_superAttributes = array();
@@ -117,7 +129,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             /*----------------------------------------*/
 
 
-            Mage::log("process", null, 'process.log', true);
+//            Mage::log("process", null, 'process.log', true);
             //Mage::log("ITEM Class: " . get_class($item), null, 'cart.log', true);
             //Mage::log("ITEM Id: " . $item->getProductId(), null, 'cart.log', true);
 
@@ -152,7 +164,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             $productModel = Mage::getModel('catalog/product')->load($item->getProductId());
 
             if (!$isLocationAllow) {
-                if ($api_mproduct->getLocationAllow() && !$item->getPriceSkybox()) {
+                if ($product_api->getLocationAllow() && !$item->getPriceSkybox()) {
                     $item->setPriceSkybox($productModel->getPrice());
                 }
             }
@@ -168,20 +180,20 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
 
                 $product_api->CalculatePrice($item->getProductId(), null, $productModel->getPriceUsdSkybox(),
                     $item->getProductType(), null);
-                Mage::log("configurable", null, 'processcontroller.log', true);
+//                Mage::log("configurable", null, 'processcontroller.log', true);
             }
             if ($item->getProductType() === 'simple' && $parentItem && !$item->getPriceSkybox()) {
 
                 $product_api->CalculatePrice($item->getProductId(), null, $productModel->getPriceUsdSkybox(),
                     $item->getProductType(), null);
-                Mage::log("simple1", null, 'processcontroller.log', true);
+//                Mage::log("simple1", null, 'processcontroller.log', true);
             }
 
             // Simple Product
             if ($item->getProductType() === 'simple' && !$parentItem && $item->getPriceSkybox()) {
 
                 $product_api->CalculatePrice($item->getProductId(), null, null);
-                Mage::log("simple2", null, 'processcontroller.log', true);
+//                Mage::log("simple2", null, 'processcontroller.log', true);
             }
 
             // Configurable Product
@@ -193,14 +205,14 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
                 $_price = $productModel->getFinalPrice();
                 $_price = isset($_price) ? $productModel->getFinalPrice() : $productModel->getPrice();
                 $product_api->CalculatePrice($item->getProductId(), null, $_price);
-                Mage::log("simple3", null, 'processcontroller.log', true);
+//                Mage::log("simple3", null, 'processcontroller.log', true);
             }
 
             // Bundle Product
             if ($item->getProductType() === 'bundle') {
 
                 $product_api->CalculatePrice($item->getProductId(), null, $productModel->getPriceUsdSkybox());
-                Mage::log("bundle", null, 'processcontroller.log', true);
+//                Mage::log("bundle", null, 'processcontroller.log', true);
             };
 
             if ($isLocationAllow) {

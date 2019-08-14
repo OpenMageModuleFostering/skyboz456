@@ -216,6 +216,8 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
      */
     public function CallService($method, $params)
     {
+        $params['platform'] = "magento-".Mage::getVersion();
+        $params['version']  = "v.".Skybox_Core_Model_Config::SKYBOX_VERSION;
         $start_time = time();
         try {
             /**
@@ -226,7 +228,6 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
              * 4: Asignamos valores a los parametros
              * 5: Guardamos la respuesta del servicio
              */
-
             $this->setUrlService($method, $params)
                 ->SaveRequestService()
                 ->SetResponseService()

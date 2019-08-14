@@ -3,12 +3,14 @@
     <skyboxcheckout_international_index>
         <remove name="top.container"/>
         <reference name="content">
-            <block type="core/template" name="skyboxcheckout.international.index" template="skybox/checkout/skyboxcheckout.phtml"/>
+            <block type="core/template" name="skyboxcheckout.international.index"
+                   template="skybox/checkout/skyboxcheckout.phtml"/>
         </reference>
     </skyboxcheckout_international_index>
     <skyboxcheckout_international_success>
         <reference name="content">
-            <block type="core/template" name="skyboxcheckout.international.index" template="skybox/checkout/skyboxsuccess.phtml"/>
+            <block type="core/template" name="skyboxcheckout.international.index"
+                   template="skybox/checkout/skyboxsuccess.phtml"/>
         </reference>
     </skyboxcheckout_international_success>
     <checkout_onepage_index>
@@ -26,16 +28,25 @@
     Shopping cart item renderer
     -->
     <checkout_cart_index>
-        <!-- Rogged he quitado la invocación de cart -->
         <reference name="checkout.cart.methods">
-            <block type="core/template" before="content" name="skybox.checkout.cart.methods.onepage.bottom" template="skybox/checkout/onepage/link.phtml"/>
+            <block type="core/template" before="content" name="skybox.checkout.cart.methods.onepage.bottom"
+                   template="skybox/checkout/onepage/link.phtml"/>
         </reference>
-        <!--
 
         <reference name="checkout.cart.shipping">
-        <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
+            <action method="setTemplate">
+                <block type="checkout/cart_shipping" name="shippping" as="shippping" template="checkout/cart/shipping.phtml"/>
+                <template>skybox/checkout/cart/shipping.phtml</template>
+            </action>
         </reference>
-        -->
+
+        <reference name="checkout.cart.methods.multishipping">
+            <block type="checkout/multishipping_link" name="multishipping2" as="multishipping2" template="checkout/multishipping/link.phtml"/>
+            <action method="setTemplate">
+                <template>skybox/checkout/multishipping/link.phtml</template>
+            </action>
+        </reference>
+
         <reference name="checkout.cart.sidebar">
             <action method="setTemplate">
                 <template>skybox/checkout/cart/shipping.phtml</template>

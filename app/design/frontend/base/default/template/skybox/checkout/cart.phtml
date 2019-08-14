@@ -13,12 +13,11 @@ if ($_helper->getActive()) {
     /** @var Skybox_Core_Helper_Allow $allowHelper */
     $allowHelper = Mage::helper('skyboxcore/allow');
 
-    $isCartEnabled = $allowHelper->isCartBarEnabled();
-
     $_cartDataURL = "";
     $_merchant = $_helper->getMerchantCode();
     $template = "";
     $cartId = $_helper->getCartId();
+    $cssVersion= $_helper->getCssVersion();
 
     $_checkout->InitializeBarSkybox();
 
@@ -36,15 +35,15 @@ if ($_helper->getActive()) {
     // Load CSS & JS
     $skybox_url = $_helper->getSkyboxUrlMain();// $_config->skyboxDefaultUrl;
     $api_css_button_international = $skybox_url . 'widgets/api-button/css/api-button-international-css.ashx';
-    $api_css_button_international .= '?s=' . $_helper->getMerchantCode();
-    $api_css_button_international .= '&CssVersion=' . $_helper->getCssVersion();
+    $api_css_button_international .= '?s=' . $_merchant;
+    $api_css_button_international .= '&CssVersion=' . $cssVersion;
     $api_js_button_international = $skybox_url . 'Content/debug/API/js/api-button-tooltip.js';
     $countryChange = 0;
 
     if ($allowHelper->isCartBarEnabled()) :
         $countryChange = 1;
         $template = '';
-        $cart = $_config->getSession()->getCartSkybox();
+//        $cart = $_config->getSession()->getCartSkybox();
         if (!empty($cart)) :
             $template = $cart->BarHtmlTemplate;
             foreach ($cart as $key => $value) :
@@ -56,7 +55,7 @@ if ($_helper->getActive()) {
     endif;
 
     if ($allowHelper->isChangeCountryEnabled()):
-        $cart = $_config->getSession()->getCartSkybox();
+//        $cart = $_config->getSession()->getCartSkybox();
         $template = "<div class='main-container' style='padding: 10px 0 0;text-align: right;'>";
         $template .= "<div class='change_country'>";
         $template .= "<a class='skx_position_option_country' href='javascript:;'>Change country</a>";
@@ -79,9 +78,10 @@ if ($_helper->getActive()) {
     $skyBoxUrlClient = $skyBoxUrlClientGet . "multiplecalculate/" . $storeCode . "/calc-";
     $skyboxForceReload = intval(Mage::getBlockSingleton('page/html_header')->getIsHomePage());
     ?>
+
     <link rel="stylesheet" type="text/css" href="<?php echo $api_css_button_international; ?>"/>
     <link rel="stylesheet" type="text/css"
-          href="<?php echo $this->getSkinUrl('css/skybox/style.css?v=' . $_helper->getCssVersion()); ?>"/>
+          href="<?php echo $this->getSkinUrl('css/skybox/style.css?v=' . $cssVersion); ?>"/>
     <script type="text/javascript">
         var URL_CHECK_CART = "<?php echo $urlCheckCart ?>";
         var CART_ID = "<?php echo $cartId ?>";
@@ -100,7 +100,7 @@ if ($_helper->getActive()) {
 
         (function ($) {
             $(document).ready(function () {
-                if (typeof $.fancybox != "function") {
+                if (typeof $.fancybox !== "function") {
                     var fileref = document.createElement("link");
                     fileref.rel = "stylesheet";
                     fileref.type = "text/css";
@@ -113,7 +113,6 @@ if ($_helper->getActive()) {
                     var dataId = $(this).attr("id");
                     var id = $(this).attr("product-id");
                     var url = SkyBoxUrlClient + id + ".html";
-                    // console.log("URL : " + url);
                     var content = $.get(url, function (data) {
                         $("#" + dataId).html(data);
                     });
@@ -124,7 +123,7 @@ if ($_helper->getActive()) {
     <script src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . 'js/skybox/main.js'; ?>"></script>
     <script type="text/javascript">
         //<![CDATA[
-        var SKYBOX_OPTIONS_PRICE_URL = '<?php echo Mage::getUrl(); ?>skbcheckout/calculate';
+        var SKYBOX_OPTIONS_PRICE_URL = '<?php echo Mage::getUrl("skbcheckout/calculate"); ?>';
         //]]>
     </script>
     <script type="text/javascript" src="<?php echo $api_js_button_international; ?>"></script>
@@ -133,14 +132,15 @@ if ($_helper->getActive()) {
     $forceReload = $_config->getSession()->getChangeCountryHomePage();
     $forceReload = isset($forceReload) ? $forceReload : 0;
 
-    if (Mage::getBlockSingleton('page/html_header')->getIsHomePage()) :
+//    if (Mage::getBlockSingleton('page/html_header')->getIsHomePage()) :
+    if ($skyboxForceReload):
         if ($forceReload == 1):
             $forceReload = 0;
             $_config->getSession()->setChangeCountryHomePage($forceReload);
             ?>
             <script type="text/javascript">
-                //                console.log("[Skybox] Reloading page...");
-                window.location.reload(false);
+                console.log("[Skybox] Reloading page...");
+                window.location.reload(true);
             </script>
             <?php
         endif;
@@ -148,6 +148,7 @@ if ($_helper->getActive()) {
     ?>
     <script>
         setTimeout(function () {
+            jQuery("a[href='#'].skx-bar-other").attr('href', 'javascript:;');
             var country_change = "<?php echo $countryChange?>";
             if (parseInt(country_change) === 1) {
                 var currencyISO_ = document.getElementsByClassName('skx_banner_label_currencyISO');
@@ -171,7 +172,6 @@ if ($_helper->getActive()) {
             }
         }, 500);
     </script>
-
     <?php
 }
 ?>

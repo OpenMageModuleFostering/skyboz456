@@ -1,11 +1,11 @@
 <?php
 /**
- * @see Mage_Checkout_Block_Cart_Shipping
+ * @see Mage_Checkout_Block_Multishipping_Link
  */
 $allowHelper = Mage::helper('skyboxcore/allow');
 if (!$allowHelper->isPriceEnabled()) :
     ?>
-    <?php echo $this->getChildHtml('shippping') ?>
+    <?php echo $this->getChildHtml('multishipping2') ?>
     <?php
 endif;
 ?>
