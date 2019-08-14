@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Skybox_Checkout>
-            <version>0.1.0</version>
+            <version>1.2.4</version>
             <codePool>community</codePool>
         </Skybox_Checkout>
     </modules>
@@ -160,6 +160,11 @@
                     <cart>Skybox_Checkout_Model_Cart</cart>
                 </rewrite>
             </checkout>
+            <sales>
+                <rewrite>
+                    <quote_item>Skybox_Checkout_Model_Quote_Item</quote_item>
+                </rewrite>
+            </sales>
         </models>
         <blocks>
             <skyboxcheckout>
@@ -243,6 +248,14 @@
                   </skyboxcheckout_removetax_observer>
               </observers>
             </sales_quote_collect_totals_before-->
+            <sales_quote_collect_totals_before>
+              <observers>
+                  <frontend_shipping_rates_sales_quote_collect_totals_before>
+                      <class>Skybox_Checkout_Model_Observer</class>
+                      <method>hideShippingMethod</method>
+                  </frontend_shipping_rates_sales_quote_collect_totals_before>
+              </observers>
+            </sales_quote_collect_totals_before>
         </events>
         <!--rewrite>
           <skybox_checkout_cart>
@@ -432,7 +445,7 @@
     <default>
         <carriers>
             <skyboxcheckout_shipping>
-                <active>0</active>
+                <active>1</active>
                 <model>skyboxcheckout/carrier</model>
                 <title>SkyboxCheckout Method</title>
                 <price>0</price>

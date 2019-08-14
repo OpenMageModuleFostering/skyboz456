@@ -67,7 +67,7 @@ class Skybox_Checkout_CalculateController extends Mage_Core_Controller_Front_Act
                     break;
             }
 
-            $extraHtml = '<p class="label" id="skybox-configurable-price-from-'
+            $extraHtml = '<div style="font-weight:bold" id="skybox-configurable-price-from-'
                 . $product->getId()
                 //. $this->getIdSuffix()
                 . ''

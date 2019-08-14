@@ -10,6 +10,7 @@
 class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 {
     const MESSAGE_FAIL_TO_ADD_PRODUCT = '[sales] Failed to add the product to the cart.';
+
     protected $_api = null;
     protected $_product = null;
     protected $_enable = null;
@@ -23,12 +24,41 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
         return $this->_api;
     }
 
+    protected function _getAllowHelper()
+    {
+        return Mage::helper('skyboxcore/allow');
+    }
+
+    // @todo : Move this logic to a helper
     private function isEnable()
     {
-        if (null === $this->_enable) {
-//            $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
-            $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
-            $this->_enable = $value;
+        if ($this->_enable == null) {
+
+            $isActive = boolval(Mage::helper('skyboxinternational/data')->getActive());
+
+            if (!$isActive) {
+                return false;
+            }
+
+            $isEnable = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+
+            if (!$isEnable) {
+                return false;
+            }
+
+            $allowHelper = Mage::helper('skyboxcore/allow');
+
+            if (!$allowHelper->isOperationCartEnabled()) {
+                return false;
+            }
+
+            $api_mproduct = Mage::getModel('skyboxcatalog/api_product');
+
+            if (!$api_mproduct->getLocationAllow()) {
+                return false;
+            }
+
+            $this->_enable = true;
         }
         return $this->_enable;
     }
@@ -263,8 +293,6 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
         try {
             $quote = parent::addProduct($productInfo, $requestInfo);
-            // $lastAddedProductId = $this->getCheckoutSession()->getLastAddedProductId();
-            // Mage::log("lastAddedProductId :: " . $lastAddedProductId, null, 'bueyada.log', true);
             $this->_updateQuoteItem($productId, $productIdSkybox);
         } catch (\Exception $e) {
             Mage::log($e->getMessage(), null, 'tracer.log', true);
@@ -492,6 +520,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function removeItem($itemId)
     {
+        Mage::log('Skybox rulez! -  removeItem !!', null, 'bueyada.log', true);
+
         /**
          * only one time for call to service start - Active
          * when do remove
@@ -534,6 +564,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function updateItems($data)
     {
+        Mage::log('Skybox updateItems!!!', null, 'bueyada.log', true);
+
         /**
          * only one time for call to service start - Active
          * when do remove
@@ -549,7 +581,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
             return $this;
         }
 
-        Mage::log('pas x aqui5', null, 'minicars.log', true);
+        Mage::log('pas x aqui5', null, 'cartdetail.log', true);
         //Mage::log(print_r($data, true), null, 'tracer.log', true);
         //Mage::log("Skybox_Checkout_Checkout_Model_Cart updateItem");
         //return parent::updateItems($data);
@@ -586,7 +618,7 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
 
                 $idProductSkybox = $item->getIdProductSkybox();
 
-                $this->_getApi()->UpdateProductOfCart($idProductSkybox, $qty);
+                // $this->_getApi()->UpdateProductOfCart($idProductSkybox, $qty);
 
                 $item->setQty($qty);
 
@@ -639,6 +671,8 @@ class Skybox_Checkout_Model_Cart extends Mage_Checkout_Model_Cart
      */
     public function updateItem($itemId, $requestInfo = null, $updatingParams = null)
     {
+        Mage::log('Skybox rulez! - updateItem !!', null, 'bueyada.log', true);
+
         if (!$this->isEnable()) {
             $result = parent::updateItem($itemId, $requestInfo, $updatingParams);
             return $result;

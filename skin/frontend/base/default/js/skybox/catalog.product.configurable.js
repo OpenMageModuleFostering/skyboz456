@@ -11,7 +11,10 @@ if (typeof Product != 'undefined') {
             var $jq = jQuery.noConflict();
             $jq(".skx_content_button").each(function () {
                 //Tipped.create($jq(this).find(".skx_content_button")[0], $jq(this).find(".skx_content_button_detail")[0], { skin: 'light', hook: 'lefttop' });
-                Tipped.create($jq(".skx_button_content")[0], $jq(".skx_content_button_detail")[0], { skin: 'light', hook: 'lefttop' });
+                Tipped.create($jq(".skx_button_content")[0], $jq(".skx_content_button_detail")[0], {
+                    skin: 'light',
+                    hook: 'lefttop'
+                });
                 $jq(this).mouseover(function () {
                     $jq(this).find(".t_Tooltip").show();
                 });
@@ -21,15 +24,18 @@ if (typeof Product != 'undefined') {
     }
 
     function prototypeButton() {
-      
+
         $$('.skx_content_button').each(function () {
-          
+
 
             //Tipped.create($$('.skx_button_content')[0], $$('".skx_content_button_detail')[0], { skin: 'light', hook: 'lefttop' });
-            Tipped.create($$('.skx_button_content'), $$('".skx_content_button_detail'), { skin: 'light', hook: 'lefttop' });
+            Tipped.create($$('.skx_button_content'), $$('".skx_content_button_detail'), {
+                skin: 'light',
+                hook: 'lefttop'
+            });
 
             $$('.skx_content_button').observe('mouseover', function () {
-              
+
                 Prototype.Selector.find($$('.skx_content_button'), '.t_Tooltip', 0).show();
             });
         });
@@ -38,6 +44,7 @@ if (typeof Product != 'undefined') {
     var SkyboxOptionsPrice = Class.create(Product.OptionsPrice, {
 
         makeAjaxCall: function () {
+            document.getElementsByClassName('price-info')[0].innerHTML = "<img src='https://cdn.shopify.com/s/files/1/1976/9429/t/1/assets/ajax-loader.gif?10083406412996855781'/>";
             console.log("Price: " + this.myProductPrice);
             var request = $('product_addtocart_form').serialize();
 
@@ -62,7 +69,7 @@ if (typeof Product != 'undefined') {
 
                     if (price_info) {
                         //console.log('price-info');
-                        //$$('.price-info')[0].innerHTML = response;
+                        $$('.price-info')[0].innerHTML = response;
                     }
 
                     jqueryButton();
@@ -101,16 +108,17 @@ if (typeof Product != 'undefined') {
             price = optionPrices + parseFloat(_productPrice);
             _priceInclTax += parseFloat(_productPrice) * (100 + this.currentTax) / 100;
 
-            console.log('Price incl tax: '+_priceInclTax);
-            console.log('Origin Tax: '+this.currentTax);
             var tax = price * (this.currentTax / 100);
-            console.log('Tax: '+tax);
             var excl = price;
-            console.log('price reload: '+price);
             // var incl = excl + tax;
             var incl = excl;
-            console.log('Price + Tax: '+incl);
             var finalPrice = parseFloat(incl);
+
+            /*console.log('Price incl tax: ' + _priceInclTax);
+            console.log('Origin Tax: ' + this.currentTax);
+            console.log('Tax: ' + tax);
+            console.log('price reload: ' + price);
+            console.log('Price + Tax: ' + incl);*/
 
             this.url = SKYBOX_OPTIONS_PRICE_URL;
             this.myProductPrice = finalPrice;

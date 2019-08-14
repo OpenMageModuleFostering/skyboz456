@@ -74,15 +74,17 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
      */
     public function _toHtml()
     {
-        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        $isModuleEnable = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
 
-        if (!$activation) {
-            return '';
+        if (!$isModuleEnable) {
+            return parent::_toHtml();
         }
-        //$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
-        $typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
-        //Mage::log(print_r('product\Price::_toHtml', true), null, 'tracer.log', true);
-        if ($this->_getApi()->getLocationAllow() && ($typeIntegration != 3)) {
+
+        /** @var Skybox_Core_Helper_Allow $allowHelper */
+        $allowHelper = Mage::helper('skyboxcore/allow');
+
+        if ($allowHelper->isPriceEnabled()) {
+
             if ($this->_getApi()->getErrorAuthenticate() && !$this->_getApi()->getLocationAllow() && $this->_getApi()->HasError()) {
                 return '';
             } elseif ($this->_getApi()->HasError()) {
@@ -98,18 +100,15 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
                 return '';
             }
 
-            /* @var $product Mage_Catalog_Model_Product */
+            /* @var Mage_Catalog_Model_Product $product */
             $product = $this->getProduct();
             $type = $product->getTypeId();
             $route_name = Mage::app()->getRequest()->getRouteName();
-
-//            Mage::log(print_r('$route_name: '. $route_name, true), null, 'tracer.log', true);
 
             // Simple Product
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/price.phtml') {
                 return $this->calculatePrice($product);
             }
-
 
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/view/price_clone.phtml') {
                 return '';
@@ -117,9 +116,6 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
 
             // Configurable Product
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/price.phtml') {
-                /*if ($route_name == 'catalog') {
-                    return '';
-                }*/
 
                 if (Mage::registry('current_product')) {
                     return "";
@@ -134,7 +130,9 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
                 }
                 return '';
             }
+
         }
+
         return parent::_toHtml();
     }
 
@@ -156,7 +154,11 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
         $type = $product->getTypeId();
         //Mage::log(print_r('product\Price: '.$type, true), null, 'tracer.log', true);
 
-        if (Mage::registry('current_category') and (!(Mage::registry('current_product')))) {
+        $multiCalculate = Mage::registry('skybox_multicalculate');
+
+        // if ($multiCalculate and Mage::registry('current_category') and (!(Mage::registry('current_product')))) {
+
+        if ($multiCalculate && Mage::registry('current_category')) {
             /**
              * Apply multiple calculate start
              * When: is different to product detail and you are on catalog category

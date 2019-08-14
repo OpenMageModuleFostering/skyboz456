@@ -270,8 +270,8 @@ class Skybox_Core_Model_Standard
         }
 
 
-        $total_time = round(microtime(true)-$start, 4);
-        Mage::log('Servicio generado ['.$action.']: '.$total_time.' segundos.', null, 'timer.log',true);
+        // $total_time = round(microtime(true)-$start, 4);
+        // Mage::log('Servicio generado ['.$action.']: '.$total_time.' segundos.', null, 'timer.log',true);
 
         return $this;
     }

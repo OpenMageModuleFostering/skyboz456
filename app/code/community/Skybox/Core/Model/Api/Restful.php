@@ -70,6 +70,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         return $this;
     }
 
+    // @todo Rewrite the way to get GUID
     public function getGuidApi()
     {
         $guidId = null;
@@ -85,7 +86,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         if (!$guidId) {
             $skyboxSession = $this->_config->getSession()->getCookieGuid();
             if ($skyboxSession) {
-                Mage::log(' | CallApiRest->Error2 | ', null, 'guid.log', true);
+                // Mage::log(' | CallApiRest->Error2 | ', null, 'guid.log', true);
                 Mage::log("Call getGuidApi() from getSession(): " . $this->_config->getSession()->getCookieGuid(), null,
                     'guid.log', true);
                 $guidId = $this->_config->getSession()->getCookieGuid();
