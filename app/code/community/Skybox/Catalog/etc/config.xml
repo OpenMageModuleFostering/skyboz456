@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <modules>
+        <Skybox_Catalog>
+            <version>0.1.0</version>
+            <codePool>community</codePool>
+        </Skybox_Catalog>
+    </modules>
+    <global>
+
+        <blocks>
+            <skyboxcatalog>
+                <class>Skybox_Catalog_Block</class>
+            </skyboxcatalog>
+            <catalog>
+                <rewrite>
+                    <product_price>Skybox_Catalog_Block_Product_Price</product_price>
+                    <product_widget_new>Skybox_Catalog_Block_Product_Widget_New</product_widget_new>
+                </rewrite>
+            </catalog>
+            <bundle>
+                <rewrite>
+                    <catalog_product_price>Skybox_Catalog_Block_Bundle_Price</catalog_product_price>
+                </rewrite>
+            </bundle>
+            <!--
+            <adminhtml>
+                <rewrite>
+                    <catalog_category_tabs>Skybox_Catalog_Block_Catalog_Category_Tabs</catalog_category_tabs>
+                </rewrite>
+            </adminhtml>
+            -->
+        </blocks>
+
+        <models>
+            <skyboxcatalog>
+                <class>Skybox_Catalog_Model</class>
+            </skyboxcatalog>
+            <!--
+            <catalog>
+                <rewrite>
+                    <product_type_price>Skybox_Catalog_Model_Product_Type_Price</product_type_price>
+                </rewrite>
+            </catalog>
+            -->
+        </models>
+
+        <resources>
+            <skyboxcatalog_setup>
+                <setup>
+                    <module>Skybox_Catalog</module>
+                    <class>Skybox_Catalog_Model_Resource_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </skyboxcatalog_setup>
+        </resources>
+
+        <events>
+            <!-- Observers for Magento 1.8.x issues with Block Caching -->
+            <controller_action_predispatch>
+                <observers>
+                    <controller_action_before>
+                        <class>skyboxcatalog/observer</class>
+                        <method>hookToControllerActionPreDispatch</method>
+                    </controller_action_before>
+                </observers>
+            </controller_action_predispatch>
+            <controller_action_postdispatch>
+                <observers>
+                    <controller_action_after>
+                        <class>skyboxcatalog/observer</class>
+                        <method>hookToControllerActionPostDispatch</method>
+                    </controller_action_after>
+                </observers>
+            </controller_action_postdispatch>
+            <add_to_cart_before>
+                <observers>
+                    <add_to_cart_before>
+                        <class>skyboxcatalog/observer</class>
+                        <method>hookToAddToCartBefore</method>
+                    </add_to_cart_before>
+                </observers>
+            </add_to_cart_before>
+            <add_to_cart_after>
+                <observers>
+                    <add_to_cart_after>
+                        <class>skyboxcatalog/observer</class>
+                        <method>hookToAddToCartAfter</method>
+                    </add_to_cart_after>
+                </observers>
+            </add_to_cart_after>
+            <!-- /Observers -->
+
+            <!--
+            <adminhtml_catalog_category_tabs>
+                <observers>
+                    <skyboxcatalog_customtab_observer>
+                        <class>skyboxcatalog/observer</class>
+                        <method>hookToAddTabToCategory</method>
+                    </skyboxcatalog_customtab_observer>
+                </observers>
+            </adminhtml_catalog_category_tabs>
+            -->
+
+            <catalog_category_prepare_save>
+                <observers>
+                    <skyboxcatalog_category_prepare_save>
+                        <class>skyboxcatalog/observer</class>
+                        <method>saveCategory</method>
+                    </skyboxcatalog_category_prepare_save>
+                </observers>
+            </catalog_category_prepare_save>
+
+        </events>
+    </global>
+
+
+    <adminhtml>
+        <events>
+
+            <!--
+
+            <adminhtml_catalog_category_edit_prepare_form>
+                <observers>
+                    <bueyada_catalog_observer>
+                        <type>singleton</type>
+                        <class>bueyada_catalog/observer</class>
+                        <method>addCategoryTab</method>
+                    </bueyada_catalog_observer>
+                </observers>
+            </adminhtml_catalog_category_edit_prepare_form>
+
+ -->
+
+            <core_block_abstract_prepare_layout_after>
+                <observers>
+                    <skybox_catalog_observer>
+                        <type>singleton</type>
+                        <class>skyboxcatalog/observer</class>
+                        <method>injectTab</method>
+                    </skybox_catalog_observer>
+                </observers>
+            </core_block_abstract_prepare_layout_after>
+
+            <catalog_product_prepare_save>
+                <observers>
+                    <skybox_catalog_observer>
+                        <type>singleton</type>
+                        <class>skyboxcatalog/observer</class>
+                        <method>setCommodityInForm</method>
+                    </skybox_catalog_observer>
+                </observers>
+            </catalog_product_prepare_save>
+
+        </events>
+
+        <layout>
+            <updates>
+                <skyboxcatalog>
+                    <file>skyboxcatalog.xml</file>
+                </skyboxcatalog>
+            </updates>
+        </layout>
+    </adminhtml>
+
+</config>

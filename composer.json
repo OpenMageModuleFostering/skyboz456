@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/SKYBOZ456",
+    "type": "magento-module",
+    "license": "Open",
+    "homepage": "",
+    "description": "Skybox Checkout enables site to sell instantly to 180 countries & territories and accept payment.",
+    "authors": [
+    {
+        "name": "Emilio Lizarraga",
+        "email": "emilio@skynet.net"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

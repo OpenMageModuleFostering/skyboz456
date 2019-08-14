@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:typens="urn:{{var wsdl.name}}" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/"
+    name="{{var wsdl.name}}" targetNamespace="urn:{{var wsdl.name}}">
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:Magento">
+            <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/" />
+        </schema>
+    </types>
+    
+    <message name="servicesSetStatusOrderRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="orderIncrementId" type="xsd:string" />
+        <part name="status" type="xsd:string" />
+    </message>
+    <message name="servicesSetStatusOrderResponse">
+        <part name="result" type="xsd:boolean" />
+    </message>
+
+    <message name="servicesSetQuoteDesactiveRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="quoteId" type="xsd:int" />
+    </message>
+    <message name="servicesSetQuoteDesactiveResponse">
+        <part name="result" type="xsd:boolean" />
+    </message>
+
+
+    <message name="servicesGenerateOrderRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="IdCart" type="xsd:int" />
+        <part name="IdStore" type="xsd:string" />
+        <part name="CustomerName" type="xsd:string" />
+        <part name="CustomerLasName" type="xsd:string" />
+        <part name="CustomerEmail" type="xsd:string" />
+        <part name="CustomerAdresss" type="xsd:string" />
+        <part name="CustomerPhone" type="xsd:string" />
+        <part name="CustomerZipCode" type="xsd:string" />
+        <part name="CityName" type="xsd:string" />
+        <part name="CountryId" type="xsd:string" />
+        <part name="RegionId" type="xsd:string" />
+    </message>
+
+    <message name="servicesGenerateOrderResponse">
+        <part name="result" type="xsd:string" />
+    </message>
+
+
+    <portType name="{{var wsdl.handler}}PortType">
+
+        <operation name="servicesSetStatusOrder">
+            <documentation>Change status order to complete</documentation>
+            <input message="typens:servicesSetStatusOrderRequest" />
+            <output message="typens:servicesSetStatusOrderResponse" />
+        </operation>
+
+        <operation name="servicesSetQuoteDesactive">
+            <documentation>Change Quote to Desactive</documentation>
+            <input message="typens:servicesSetQuoteDesactiveRequest" />
+            <output message="typens:servicesSetQuoteDesactiveResponse" />
+        </operation>
+
+        <operation name="servicesGenerateOrder">
+            <documentation>Generate Order Magento</documentation>
+            <input message="typens:servicesGenerateOrderRequest" />
+            <output message="typens:servicesGenerateOrderResponse" />
+        </operation>
+
+
+    </portType>
+    <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <operation name="servicesSetStatusOrder">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+
+        <operation name="servicesSetQuoteDesactive">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+
+        <operation name="servicesGenerateOrder">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+
+    </binding>
+</definitions>

@@ -1,0 +1,104 @@
+<config>
+    <tabs>
+        <skyboxinternational translate="label" module="skyboxinternational">
+            <label>Skybox Checkout</label>
+            <sort_order>100</sort_order>
+        </skyboxinternational>
+    </tabs>
+    <sections>
+        <skyboxinternational translate="label" module="skyboxinternational">
+            <label>Skybox Checkout Settings</label>
+            <tab>skyboxinternational</tab>
+            <sort_order>1000</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <skyboxsettings translate="label" module="skyboxinternational">
+                    <label>Merchant Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1000</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <skyboxactive translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxactive>
+                        <merchantcode translate="label">
+                            <label>Merchant Id:</label>
+                            <comment>Code Merchant by Skybox Checkout International</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchantcode>
+                        <merchantkey translate="label">
+                            <label>Merchant Key:</label>
+                            <comment>Key Merchant by Skybox Checkout International</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchantkey>
+                        <weigthunitproduct translate="label">
+                            <label>Weight Unit:</label>
+                            <comment>Source model provider Magento's unit of measure values</comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <source_model>usa/shipping_carrier_ups_source_unitofmeasure</source_model>
+                        </weigthunitproduct>
+                        <skyboxlog translate="label">
+                            <label>Save API Responses</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxlog>
+                        <skyboxemail translate="label">
+                            <label>SkyBox Email:</label>
+                            <comment>SkyBox Email</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-email</validate>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxemail>
+                        <skyboxurlapi translate="label">
+                            <label>SkyBox Url API:</label>
+                            <comment>Url API By Skybox Checkout International</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxurlapi>
+                        <skyboxurlmain translate="label">
+                            <label>SkyBox Url Client:</label>
+                            <comment>Url Client By Skybox Checkout International</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </skyboxurlmain>
+                    </fields>
+                </skyboxsettings>
+            </groups>
+        </skyboxinternational>
+    </sections>
+</config>

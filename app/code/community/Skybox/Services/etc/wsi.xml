@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:typens="urn:{{var wsdl.name}}"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+             name="{{var wsdl.name}}"
+             targetNamespace="urn:{{var wsdl.name}}">
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:{{var wsdl.name}}">
+
+
+            <xsd:element name="servicesSetStatusOrderRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="orderIncrementId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="status" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="servicesSetStatusOrderResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:boolean" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="servicesSetQuoteDesactiveRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="quoteId" type="xsd:int" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="servicesSetQuoteDesactiveResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:boolean" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="servicesGenerateOrderRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="IdCart" type="xsd:int" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="IdStore" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerName" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerLasName" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerEmail" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerAdresss" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerPhone" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CustomerZipCode" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CityName" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="CountryId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="RegionId" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="servicesGenerateOrderResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+
+        </xsd:schema>
+    </wsdl:types>
+
+
+    <wsdl:message name="ServicesSetStatusOrderRequest">
+        <wsdl:part name="parameters" element="typens:servicesSetStatusOrderRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="ServicesSetStatusOrderResponse">
+        <wsdl:part name="parameters" element="typens:servicesSetStatusOrderResponseParam" />
+    </wsdl:message>
+
+    <wsdl:message name="ServicesSetQuoteDesactiveRequest">
+        <wsdl:part name="parameters" element="typens:servicesSetQuoteDesactiveRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="ServicesSetQuoteDesactiveResponse">
+        <wsdl:part name="parameters" element="typens:servicesSetQuoteDesactiveResponseParam" />
+    </wsdl:message>
+
+    <wsdl:message name="ServicesGenerateOrderRequest">
+        <wsdl:part name="parameters" element="typens:servicesGenerateOrderRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="ServicesGenerateOrderResponse">
+        <wsdl:part name="parameters" element="typens:servicesGenerateOrderResponseParam" />
+    </wsdl:message>
+
+
+    <wsdl:portType name="{{var wsdl.handler}}PortType">
+
+        <wsdl:operation name="ServicesSetStatusOrder">
+            <wsdl:documentation>Service set status</wsdl:documentation>
+            <wsdl:input message="typens:ServicesSetStatusOrderRequest" />
+            <wsdl:output message="typens:ServicesSetStatusOrderResponse" />
+        </wsdl:operation>
+
+
+        <wsdl:operation name="ServicesSetQuoteDesactive">
+            <wsdl:documentation>Service desactive quote</wsdl:documentation>
+            <wsdl:input message="typens:ServicesSetQuoteDesactiveRequest" />
+            <wsdl:output message="typens:ServicesSetQuoteDesactiveResponse" />
+        </wsdl:operation>
+
+        <wsdl:operation name="ServicesGenerateOrder">
+            <wsdl:documentation>Generate Order Magento</wsdl:documentation>
+            <wsdl:input message="typens:ServicesGenerateOrderRequest" />
+            <wsdl:output message="typens:ServicesGenerateOrderResponse" />
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+    <wsdl:binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="ServicesSetStatusOrder">
+            <soap:operation soapAction="" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="ServicesSetQuoteDesactive">
+            <soap:operation soapAction="" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="ServicesGenerateOrder">
+            <soap:operation soapAction="" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+    </wsdl:binding>
+</wsdl:definitions>

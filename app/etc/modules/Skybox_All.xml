@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Skybox_Core>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Skybox_Core>
+        <Skybox_International>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Skybox_International>
+        <Skybox_Services>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Skybox_Services>
+        <Skybox_Checkout>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Core/>
+                <Mage_Checkout/>
+                <!--Skybox_Core /-->
+            </depends>
+        </Skybox_Checkout>
+        <Skybox_Catalog>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Core/>
+                <Mage_Catalog/>
+                <!--Skybox_Core /-->
+            </depends>
+        </Skybox_Catalog>
+    </modules>
+</config>

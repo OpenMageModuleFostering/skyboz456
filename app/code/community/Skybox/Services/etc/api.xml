@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config>
+    <api>
+        <resources>
+            <services>
+                <model>services/api</model>
+                <title>Skybox Web Services</title>
+                <methods>
+                    <setStatusOrder translate="title" module="services">
+                        <title>Change status order to complete</title>
+                        <method>setStatusOrder</method>
+                        <acl>services/setStatusOrder</acl>
+                    </setStatusOrder>
+                    <setQuoteDesactive translate="title" module="services">
+                        <title>Change Quote to Desactive</title>
+                        <method>setQuoteDesactive</method>
+                        <acl>services/setQuoteDesactive</acl>
+                    </setQuoteDesactive>
+                    <generateOrder  translate="title" module="services">
+                        <title>Generate Order Magento</title>
+                        <method>generateOrder</method>
+                        <acl>services/generateOrder</acl>
+                    </generateOrder>
+                </methods>
+            </services>
+        </resources>
+        <v2>
+            <resources_function_prefix>
+                <services>services</services>
+            </resources_function_prefix>
+        </v2>
+    </api>
+</config>

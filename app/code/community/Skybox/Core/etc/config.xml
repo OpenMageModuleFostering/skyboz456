@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <modules>
+        <Skybox_Core>
+            <version>0.1.0</version>
+            <codePool>community</codePool>
+        </Skybox_Core>
+    </modules>
+    <global>
+
+        <models>
+            <skyboxcore>
+                <class>Skybox_Core_Model</class>
+                <resourceModel>skyboxcore_mysql4</resourceModel>
+            </skyboxcore>
+            <skyboxcore_mysql4>
+                <class>Skybox_Core_Model_Mysql4</class>
+                <entities>
+                    <logservice>
+                        <table>skybox_log_service</table>
+                    </logservice>
+                </entities>
+            </skyboxcore_mysql4>
+        </models>
+
+        <resources>
+            <skyboxcore_setup>
+                <setup>
+                    <module>Skybox_Core</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </skyboxcore_setup>
+            <skyboxcore_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </skyboxcore_write>
+            <skyboxcore_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </skyboxcore_read>
+        </resources>
+
+        <helpers>
+            <skyboxcore>
+                <class>Skybox_Core_Helper</class>
+            </skyboxcore>
+        </helpers>
+
+        <blocks>
+            <skyboxcore>
+                <class>Skybox_Core_Block</class>
+            </skyboxcore>
+        </blocks>
+
+    </global>
+</config>

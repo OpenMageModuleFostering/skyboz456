@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout version="0.1.0">
+	<skyboxinternational_adminhtml_debug_index>
+        <reference name="content">
+            <block type="skyboxinternational/adminhtml_debug" name="skyboxinternational_debug_info" />
+        </reference>
+    </skyboxinternational_adminhtml_debug_index>
+
+    <adminhtml_sales_order_view>
+      <reference name="order_totals">
+        <block type="skyboxcheckout/sales_order_total" before="tax" />
+      </reference>
+    </adminhtml_sales_order_view>
+    
+</layout>

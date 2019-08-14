@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Skybox_Services>
+            <active>true</active>
+            <version>0.1.0</version>
+            <codePool>community</codePool>
+        </Skybox_Services>
+    </modules>
+    <global>
+        <models>
+            <services>
+                <class>Skybox_Services_Model</class>
+            </services>
+        </models>
+    </global>
+    <!--frontend>
+        <events>
+            <controller_front_init_routers>
+                <observers>
+                    <Skybox_checkout_model_observer><type>disabled</type></Skybox_checkout_model_observer>
+                </observers>
+            </controller_front_init_routers>
+        </events>
+    </frontend-->
+</config>
