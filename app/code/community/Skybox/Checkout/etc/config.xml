@@ -172,6 +172,33 @@
                 </rewrite>
             </checkout>
 
+            <checkout>
+                <rewrite>
+                    <cart_totals>Skybox_Checkout_Block_Cart_Totals</cart_totals>
+                </rewrite>
+            </checkout>
+
+            <checkout>
+                <rewrite>
+                    <onepage_link>Skybox_Checkout_Block_Checkout_Onepage_Link</onepage_link>
+                </rewrite>
+            </checkout>
+            <checkout>
+                <rewrite>
+                    <links>Skybox_Checkout_Block_Checkout_Links</links>
+                </rewrite>
+            </checkout>
+            <checkout>
+                <rewrite>
+                    <cart>Skybox_Checkout_Block_Checkout_Cart</cart>
+                </rewrite>
+            </checkout>
+            <checkout>
+                <rewrite>
+                    <cart_sidebar>Skybox_Checkout_Block_Checkout_Cart_Sidebar</cart_sidebar>
+                </rewrite>
+            </checkout>
+
         </blocks>
         <resources>
             <!--skyboxcheckout_setup>
@@ -342,6 +369,14 @@
                     <data>Skybox_Checkout_Helper_Data</data>
                 </rewrite>
             </checkout>
+            <checkout>
+                <rewrite>
+                    <url>Skybox_Checkout_Helper_Url</url>
+                </rewrite>
+            </checkout>
+            <!--<skyboxcheckout_pay>-->
+                <!--<class>Skybox_Checkout_Helper</class>-->
+            <!--</skyboxcheckout_pay>-->
         </helpers>
 
     </global>
@@ -395,6 +430,27 @@
         </events>
     </frontend>
     <default>
+        <carriers>
+            <skyboxcheckout_shipping>
+                <active>1</active>
+                <model>skyboxcheckout/carrier</model>
+                <title>SkyboxCheckout Method</title>
+                <price>0</price>
+                <!--<sort_order>10</sort_order>-->
+                <!--<sallowspecific>0</sallowspecific>-->
+            </skyboxcheckout_shipping>
+        </carriers>
+        <payment>
+            <skyboxcheckout_pay>
+                <model>skyboxcheckout/pay</model>
+                <active>1</active>
+                <order_status>pending</order_status>
+                <title>Skybox Payment</title>
+                <!--<payment_action>sale</payment_action>-->
+                <!--<allowspecific>0</allowspecific>-->
+                <!--<sort_order>1</sort_order>-->
+            </skyboxcheckout_pay>
+        </payment>
         <config_vars/>
         <!--Eliminar-->
          <!--<sales>

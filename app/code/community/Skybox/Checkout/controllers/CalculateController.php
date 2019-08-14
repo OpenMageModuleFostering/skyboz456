@@ -43,7 +43,7 @@ class Skybox_Checkout_CalculateController extends Mage_Core_Controller_Front_Act
             $product = Mage::getModel('catalog/product')->load($productId);
             $type = $product->getTypeId();
             $template = null;
-
+            //Mage::log(print_r('calculateController: '.$type, true), null, 'tracer.log', true);
             switch ($type) {
                 case 'simple':
                     $template = $productAPI->CalculatePrice($product->getId(), null, $product->getFinalPrice(), 'simple')

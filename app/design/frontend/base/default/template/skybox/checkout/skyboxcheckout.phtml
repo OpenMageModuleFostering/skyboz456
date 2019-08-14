@@ -40,6 +40,7 @@ if (!$_checkout->getErrorAuthenticate() && $_checkout->getLocationAllow()) { // 
     $url .= "&idStore=" . $storeId;
     $url .= "&UrlC=" . $urlConfirm;// "http://magento.skynet.com/magento192/skbcheckout/international";
     $url .= "&paypal=" . $_GET["paypal"];
+    $url .= '&checkout=' . strip_tags(Mage::app()->getRequest()->getParam('checkout',''));
     $url .= "&UrlR=" . $urlSuccess;
 
     if($size == 0)

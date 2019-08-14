@@ -117,9 +117,23 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         return $this;
     }
 
+
+
     public function getLocationAllow()
     {
         return $this->_config->getSession()->getLocationAllow();
+    }
+
+    public function setStoreCode($value = null)
+    {
+        $storeCode = $this->getResponseJson()->{Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_STORE_CODE};
+        $storeCode = trim($storeCode);
+        $this->_config->getSession()->setStoreCode($storeCode);
+        return $storeCode;
+    }
+    public function getStoreCode()
+    {
+        return $this->_config->getSession()->getStoreCode();
     }
 
     /**
@@ -146,6 +160,8 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
     public function setAuthorizedToken($value = null)
     {
         $token = $this->getResponseJson()->{Skybox_Core_Model_Config::SKYBOX_PARAMETER_RESPONSE_TOKEN};
+        Mage::log('setAuthorizedToken token skybox: ' . $token);
+//        $token = urlencode($token);
         $this->_config->getSession()->setTokenApiRest($token);
         return $this;
     }
@@ -235,6 +251,7 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
                     $this->setGuidApi();
                 }
                 $this->setLocationAllow();
+                $this->setStoreCode();
                 $this->setHtmlTemplateBar();
                 break;
             case Skybox_Core_Model_Config::SKYBOX_ACTION_GET_TEMPLATE_BUTTON:
@@ -316,5 +333,14 @@ class Skybox_Core_Model_Api_Restful extends Skybox_Core_Model_Api_Abstract
         // Will dump a beauty json :3
         //var_dump(json_decode($result, true));
         return $result;
+    }
+
+    /**
+     * Validad que el módulo de skybox este habilitado para la tienda
+     * @return bool
+     */
+    public function isModuleEnable()
+    {
+        return (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
     }
 }

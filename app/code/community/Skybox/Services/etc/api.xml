@@ -21,6 +21,11 @@
                         <method>generateOrder</method>
                         <acl>services/generateOrder</acl>
                     </generateOrder>
+                    <generateOrderFull  translate="title" module="services">
+                        <title>Generate Order Full Magento</title>
+                        <method>generateOrderFull</method>
+                        <acl>services/generateOrderFull</acl>
+                    </generateOrderFull>
                 </methods>
             </services>
         </resources>

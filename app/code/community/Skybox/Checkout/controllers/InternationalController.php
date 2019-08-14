@@ -29,6 +29,8 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
 
     public function successAction()
     {
+        Mage::getSingleton('checkout/cart')->truncate()->save();
+
         $_config = Mage::getModel('skyboxcore/config');
         $cart = $_config->getSession()->getCartSkybox();
         $id = $cart->{'LanguageId'};
@@ -48,7 +50,8 @@ class Skybox_Checkout_InternationalController extends Mage_Core_Controller_Front
         $languages = array(
             0 => "Thanks for your purchase, We have received your order and we will contact you. We will send you a confirmation email.",
             1 => "Thanks for your purchase, We have received your order and we will contact you. We will send you a confirmation email.",
-            2 => "&#33;Gracias por su compra, Hemos recibido su orden y nos pondremos en contacto contigo. Le enviaremos un correo electrónico de confirmaci&oacute;n.",
+            // 2 => "&#33;Gracias por su compra! Hemos recibido su orden y nos pondremos en contacto contigo. Le enviaremos un correo electrónico de confirmaci&oacute;n",
+            2 => "Gracias por su compra! Le enviaremos un correo electrónico de confirmaci&oacute;n.",
             3 => "'Obrigado por sua compra, Recebemos seu pedido e entraremos em contato com você. Nós lhe enviaremos um e-mail de confirma&ccedil;&atilde;o.",
         );
         if (isset($languages[$id])) {

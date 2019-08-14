@@ -11,22 +11,51 @@ Mage::log("InitializeBarSkybox ", null, 'cartphtml.log', true);
 
 $_checkout->InitializeBarSkybox();
 
-if (!$_checkout->getErrorAuthenticate()) { // Si es correcta la authenticación en api
-    if($_checkout->getLocationAllow()){ // Si country esta disponible
-        $cart = $_config->getSession()->getCartSkybox();
-        if (!empty($cart)) {
-            $template = $cart->BarHtmlTemplate;
-            foreach ($cart as $key => $value) {
-                $template = str_replace('{' . $key . '}', $value, $template);
-            }
-        }
-        $_cartDataURL = $cart->CartDataURL;
-    }else{ // Si country no está disponible
-        $cart = $_config->getSession()->getCartSkybox(); // Rogged
-        $_cartDataURL = $cart->CartDataURL; // Rogged
-        //$template = "<a href='#' id='link_choise_country'>&nbsp;</a>";
-        $template = "<a href='#' class='skx_position_option_country'>Change country</a>"; // Rogged
+$change_country = false;
+/*LocationAllow3 start*/
+/*Dectect checkout start*/
+$checkoutCurrent = true;
+/*enciendo si esta en 3*/
+$locationAllow3 = false;
+$allowBar = true;
+
+
+$request = $this->getRequest();
+$module = $request->getModuleName();
+$controller = $request->getControllerName();
+$action = $request->getActionName();
+$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
+if($typeIntegration == 3) {
+    if($module != 'checkout' && $controller != 'cart' && $action != 'index') {
+        $allowBar = false;
     }
+    if(!$_checkout->getLocationAllow()) {
+        $allowBar = false;
+    }
+}
+
+/*LocationAllow3 end*/
+if (!$_checkout->getErrorAuthenticate()) { // Si es correcta la authenticación en api
+
+    if($allowBar) {
+        if($_checkout->getLocationAllow()){ // Si country esta disponible
+            $cart = $_config->getSession()->getCartSkybox();
+            if (!empty($cart)) {
+                $template = $cart->BarHtmlTemplate;
+                foreach ($cart as $key => $value) {
+                    $template = str_replace('{' . $key . '}', $value, $template);
+                }
+            }
+            $_cartDataURL = $cart->CartDataURL;
+        }else{ // Si country no está disponible
+            $cart = $_config->getSession()->getCartSkybox(); // Rogged
+            $_cartDataURL = $cart->CartDataURL; // Rogged
+            //$template = "<a href='#' id='link_choise_country'>&nbsp;</a>";
+            $template = "<a href='#' class='skx_position_option_country'>Change country</a>"; // Rogged
+            $change_country = true;
+        }
+    }
+
 }
 //echo '<script>console.log("'.$_cartDataURL.'")</script>';
 //$template = "<a href='#' id='link_choise_country'>&nbsp;</a>";
@@ -43,18 +72,69 @@ $api_js_button_international = $skybox_url . 'Content/debug/API/js/api-button-to
 <?php
 echo $template; // Skybox Bar
 ?>
+
+<style type="text/css">
+#selectLocation iframe {
+    width: 1px;
+    min-width: 100%;
+    *width: 100%;
+}
+#selectLocation.dialog, #initSession.dialog {
+    background: transparent !important;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="<?php echo $this->getSkinUrl('css/skybox/style.css?v=230120171122');?>"/>
 <script type="text/javascript">
+
+    jQuery(document).ready(function() {
+        jQuery(".skybox-price-set").each(function( index ) {
+            <?php
+            $skyBoxUrlClientBase = Mage::helper('skyboxinternational/data')->getSkyBoxUrlAPI();
+            //$codeShop = Mage::getStoreConfig('settings/codeShop');
+            //$codeShop = $_config->getSession()->getStoreCode();
+            $codeShop = Mage::getModel('skyboxcatalog/api_product')->getStoreCode();
+            $skyBoxUrlClientGet = str_replace("apirest/", "", $skyBoxUrlClientBase);
+            $skyBoxUrlClient = $skyBoxUrlClientGet . ("multiplecalculate/") . $codeShop ."/calc-";
+
+            //http://beta.skyboxcheckout.com/testapi/multiplecalculate/" + merchantId + "/calc-
+            ?>
+
+            var dataId =  jQuery(this).attr("id");
+            var id =  jQuery(this).attr("product-id");
+            var url = "<?php echo $skyBoxUrlClient;?>" + id + ".html";
+            console.log("URL refresh: " +url);
+            //console.log(url);
+            var content = jQuery.get(url, function( data ) {
+                jQuery("#" + dataId).html(data);
+                /*return data;*/
+            });
+
+            /*console.log(content);*/
+        });
+
+    });
+
+
+
     (function ($) {
 
         var widthPage = 0;
         var heightPage = 0;
+        var popup = {};
+        var popupWidth = 540;
+        var popupHeight = 545;
+        var win = '';
 
         function showPopup(name, t, url, w, h) {
             //winCompare = new Window('popup', {className: 'alphacube', title: t, url: url, width: w, height: h, minimizable: false, maximizable: false, showEffectOptions: {duration: 0.4}, hideEffectOptions: {duration: 0.4} });
-            winCompare = new Window(name, {className: 'alphacube', title: t, url: url, width: w, height: h, minimizable: false, maximizable: false, showEffectOptions: {duration: 0.4}, hideEffectOptions: {duration: 0.4}, destroyOnClose: true });
+            winCompare = new Window(name, {className: 'alphacube', title: t, url: url, width: w, height: h, minimizable: false, maximizable: false, showEffectOptions: {duration: 0.4}, hideEffectOptions: {duration: 0.4}, destroyOnClose: true, draggable: false, resizable: false });
             winCompare.setDestroyOnClose();
             winCompare.setZIndex(9999);
             winCompare.showCenter(true);
+            return winCompare;
         }
 
         function goToCart() {
@@ -68,22 +148,27 @@ echo $template; // Skybox Bar
             var actualUri = "<?php echo 'http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI'] ?>"
             actualUri = actualUri + "?LoadFrame=1";
             //console.log(actualUri);
-            var url = "<?php echo $skybox_url ?>" + "APILoginCustomer.aspx?" + datos + "&merchant=" + merchant + "&idCart=" + idCart + "&ReLoad=1&uri=" + actualUri;
+            // var url = "<?php echo $skybox_url ?>" + "APILoginCustomer.aspx?" + datos + "&merchant=" + merchant + "&idCart=" + idCart + "&ReLoad=1&uri=" + actualUri;
+
+            var url = "<?php echo $skybox_url ?>" + "WebForms/PublicSite/Tracking.aspx?" + datos + "&merchant=" + merchant + "&idCart=" + idCart + "&ReLoad=1&uri=" + actualUri;
             showPopup('initSession', '', url, (widthPage - 50 ), ((heightPage < 800) ? heightPage - 50 : 800));
         }
 
         function goToLocation() {
+            win = 'resync';
             var datos = "<?php echo $_cartDataURL ?>";
             var process_url = "<?php echo Mage::helper('core/url')->getHomeUrl(); ?>" + "skbcheckout/process";
             var return_url = document.URL;
             var url = "<?php echo $skybox_url ?>" + "Webforms/PublicSite/ReSync.aspx?" + datos;
+            var change_country_status = "<?php echo $change_country ?>";
             url += "&process_url=" + process_url;
             url += "&return_url=" + return_url;
-            //console.log(url);
-            //showPopup('selectLocation', 'Select your location', url, 400, 370);
-            showPopup('selectLocation', '', url, 540, 640);
+            url += "&change_country=" + change_country_status;
+
+            var _size = getSizeForPopup();
+            popup = showPopup('selectLocation', '', url, _size.width, _size.height);
         }
-        //goToLocation();
+
         function goToTrackingLocation() {
             var idCart = "<?php echo $cartId ?>";
             var datos = "<?php echo $_cartDataURL ?>";
@@ -104,6 +189,90 @@ echo $template; // Skybox Bar
             }
         }
 
+        var createCookie = function(name, value, days) {
+            var expires;
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            } else {
+                expires = "";
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=");
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1;
+                    c_end = document.cookie.indexOf(";", c_start);
+                    if (c_end == -1) {
+                        c_end = document.cookie.length;
+                    }
+                    return unescape(document.cookie.substring(c_start, c_end));
+                }
+            }
+            return "";
+        }
+
+        function postMessageIframe()
+        {
+            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+            var eventer = window[eventMethod];
+            var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+            eventer(messageEvent,function(e) {
+//                if(e.origin == 'https://www.skyboxcheckout.com'){
+                    recalculateHeightIframe(e.data);
+//                }
+            },false);
+        }
+        function recalculateHeightIframe(data)
+        {
+            console.log('recalculateHeightIframe',data);
+            if(data.win == 'resync'){
+                popupHeight = data.height;
+                console.log('popupHeight',popupHeight);
+                var _size = getSizeForPopup();
+                popup.setSize(_size.width, _size.height);
+//                popup.showCenter(true);
+            }
+        }
+        function recalculateHeight()
+        {
+            if(!jQuery.isEmptyObject(popup) && win == 'resync'){
+                var iFrameDOM = $("iframe#selectLocation_content").contents();
+                popupHeight = iFrameDOM.find("body").height()+30;
+                console.log(popupHeight);
+                var _size = getSizeForPopup();
+                popup.setSize(_size.width, _size.height)
+//                popup.updateHeight()s
+//                var fh = document.getElementById('selectLocation_content').contentWindow.document.getElementById('form1')
+            }
+            win = '';
+        }
+        function browserResize()
+        {
+            jQuery(window).resize(function() {
+                if(!jQuery.isEmptyObject(popup)){
+                    var _size = getSizeForPopup();
+                    popup.setSize(_size.width, _size.height)
+                }
+            });
+        }
+
+        function getSizeForPopup()
+        {
+            var _width = jQuery(window).width();
+            var _height = jQuery(window).height();
+            if(_width < popupWidth){
+                _width = _width - 30;
+            }else{
+                _width = popupWidth;
+            }
+            return {width: _width, height: popupHeight};
+        }
+
         $(document).ready(function () {
             widthPage = $(window).width();
             heightPage = $(window).height();
@@ -112,14 +281,28 @@ echo $template; // Skybox Bar
             $(".skx_banner_image_account").click(goToInitializeSession);
             $(".skx_banner_image_tracking").click(goToTrackingLocation);
             $("#link_choise_country").click(goToCart);
+            postMessageIframe()
             loadIframe();
+            browserResize();
+            <?php
+                if(Mage::getBlockSingleton('page/html_header')->getIsHomePage() && $change_country == true) {
+            ?>
+
+            if ( !getCookie('tivoli_latam_homepage') ) {
+                createCookie('tivoli_latam_homepage', 1);
+                //goToLocation();
+            }
+            <?php
+                }
+            ?>
         });
 
-        Windows.close = function (id, event) {
-            var actualUri = "<?php echo 'http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI'] ?>";
-            indexParams = actualUri.indexOf('?');
-            top.location = actualUri.substring(0, indexParams);
-        }
+//        Windows.close = function (id, event) {
+//            var actualUri = "<?php //echo 'http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'].$_SERVER['REQUEST_URI'] ?>//";
+//            indexParams = actualUri.indexOf('?');
+//            popup = {};
+//            top.location = actualUri.substring(0, indexParams);
+//        }
 
     })(jQuery);
 

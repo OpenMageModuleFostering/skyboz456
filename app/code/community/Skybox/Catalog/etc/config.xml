@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
+    <default>
+        <settings>
+            <typeIntegration>1</typeIntegration>
+            <codeShop>00248</codeShop>
+        </settings>
+    </default>
     <modules>
         <Skybox_Catalog>
             <version>0.1.0</version>
@@ -16,6 +22,7 @@
                 <rewrite>
                     <product_price>Skybox_Catalog_Block_Product_Price</product_price>
                     <product_widget_new>Skybox_Catalog_Block_Product_Widget_New</product_widget_new>
+                    <product_list>Skybox_Catalog_Block_Product_List</product_list>
                 </rewrite>
             </catalog>
             <bundle>

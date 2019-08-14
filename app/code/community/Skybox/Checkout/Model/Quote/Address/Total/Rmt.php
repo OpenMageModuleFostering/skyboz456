@@ -38,8 +38,12 @@ class Skybox_Checkout_Model_Quote_Address_Total_Rmt extends Mage_Sales_Model_Quo
      * El cálculo ya se habrá hecho y deberíamos guardarlo en algún sitio para aquí,
      * simplemente retornar el valor formateado y que Magento lo muestre.
      */
-    public function fetch(Mage_Sales_Model_Quote_Address $address) {        
-        
+    public function fetch(Mage_Sales_Model_Quote_Address $address)
+    {
+        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        if(!$activation) {
+            return $this;
+        }
         parent::fetch($address);
 
         $quote= $address->getQuote();

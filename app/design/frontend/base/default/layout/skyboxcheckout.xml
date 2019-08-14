@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <skyboxcheckout_international_index>
+        <remove name="top.container"/>
         <reference name="content">
             <block type="core/template" name="skyboxcheckout.international.index" template="skybox/checkout/skyboxcheckout.phtml"></block>
         </reference>
@@ -24,7 +25,11 @@
 
     <checkout_cart_index>
         <!-- Rogged he quitado la invocación de cart -->
-        
+
+        <reference name="checkout.cart.methods">
+            <block type="core/template" name="skybox.checkout.cart.methods.onepage.bottom" template="skybox/checkout/onepage/link.phtml"/>
+        </reference>
+
         <reference name="checkout.cart.shipping">
             <action method="setTemplate"><template>skybox/checkout/cart/shipping.phtml</template></action>
         </reference>
@@ -82,13 +87,15 @@
     <default>
         <reference name="head">
             <!--<block type="directory/currency" name="custom_currency_selector" template="currency/currency.phtml"/>-->
-            <action method="addJs"><script>prototype/window.js</script></action>
-            <action method="addJs"><script>prototype/debug.js</script></action>
-            <action method="addJs"><script>prototype/effects.js</script></action>
-            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
-            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/alphacube.css</name></action>
+            <action method="addJs" ifconfig="skyboxinternational/skyboxsettings/skyboxactive"><script>prototype/window.js</script></action>
+            <action method="addJs" ifconfig="skyboxinternational/skyboxsettings/skyboxactive"><script>prototype/debug.js</script></action>
+            <action method="addJs" ifconfig="skyboxinternational/skyboxsettings/skyboxactive"><script>prototype/effects.js</script></action>
+            <action method="addItem" ifconfig="skyboxinternational/skyboxsettings/skyboxactive"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
+            <action method="addItem" ifconfig="skyboxinternational/skyboxsettings/skyboxactive"><type>js_css</type><name>prototype/windows/themes/alphacube.css</name></action>
 
-            <action method="addJs"><script>skybox/load-jquery.js</script></action>
+            <action method="addJs" ifconfig="skyboxinternational/skyboxsettings/skyboxactive">
+                <script>skybox/load-jquery.js</script>
+            </action>
 
             <!-- jQuery ver. 1.7.2 -->
             <!--
@@ -114,11 +121,26 @@
             </block>
             -->
 
-            <action method="addItem"><type>skin_js</type><name>js/skybox/catalog.product.configurable.js</name></action>
+            <action method="addItem" ifconfig="skyboxinternational/skyboxsettings/skyboxactive">
+                <type>skin_js</type><name>js/skybox/catalog.product.configurable.js</name>
+            </action>
         </reference>
 
-        <reference name="top.container">
+        <!--
+        <reference name="content">
             <block type="core/template" name="skyboxcheckout.top.container.cart" before="-" template="skybox/checkout/cart.phtml"/>
+        </reference>
+        -->
+
+        <reference name="top.container">
+            <!--<reference name="content">-->
+            <block type="core/template" name="skyboxcheckout.top.container.cart">
+                <action method="setTemplate" ifconfig="skyboxinternational/skyboxsettings/skyboxactive">
+                    <template>skybox/checkout/cart.phtml</template>
+                </action>
+                <action method="unsetData"><key>cache_lifetime</key></action>
+                <action method="unsetData"><key>cache_tags</key></action>
+            </block>
         </reference>
 
         <reference name="right">

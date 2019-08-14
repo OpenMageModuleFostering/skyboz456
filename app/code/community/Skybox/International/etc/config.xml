@@ -49,10 +49,13 @@
     </adminhtml>
     <default>
         <skyboxinternational>
-            <skyboxinternationalconfig>
+            <skyboxsettings>
                 <!--host><![CDATA[localhost]]></host-->
-                <skyboxactive>1</skyboxactive>
-            </skyboxinternationalconfig>
+                <skyboxactive>0</skyboxactive>
+            </skyboxsettings>
+			<skyboxproduct>
+                <skyboxaddtaxtopriceenable>0</skyboxaddtaxtopriceenable>
+            </skyboxproduct>
         </skyboxinternational>
     </default>
 </config>

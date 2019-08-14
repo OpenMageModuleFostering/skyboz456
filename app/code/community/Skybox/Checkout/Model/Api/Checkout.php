@@ -16,6 +16,8 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
      */
     protected $_product = null;
 
+    protected $_currentProduct = null;
+
     protected $_typeProduct = "catalog/product";
 
     public function getProduct()
@@ -55,13 +57,27 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         //}
     }
 
+    public function setCurrentProduct($product)
+    {
+        $this->_currentProduct = $product;
+    }
+    public function getCurrentProduct()
+    {
+        return $this->_currentProduct;
+    }
+
     public function AddProductOfCart($data, $quantity)
     {
+        $detailProduct = Mage::helper('checkout')->concatNameDetailProduct($this->getCurrentProduct(), $data['sku']);
+
+        //Mage::log("entro AddProductOfCart", null, 'tracer.log', true);
         if ($this->getErrorAuthenticate() && !$this->getLocationAllow()) {
             return $this;
         }
 
         Mage::log("AddProductOfCart: " . print_r($data, true), null, 'skyboxcheckout.log', true);
+
+        $storeProductName = $data['name'].' '.$detailProduct;
 
         $params = array(
             Skybox_Core_Model_Config::SKYBOX_PARAMETER_MERCHANT => $this->getMerchant(),
@@ -70,12 +86,14 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
             'productid' => "0",
             'quantity' => $quantity,
             'storeproductcode' => $data['sku'],
-            'storeproductname' => $data['name'],
+            'storeproductname' => $storeProductName,
             'storeproductcategory' => $data['category_id'],
             'storeproductprice' => $data['final_price'],
-            'weight' => $data['weight'],
+            'weight' => ($data['weight'])?($data['weight']):1,
             'weightunit' => $this->getWeightUnit(),
-            'storeproductimgurl' => $data['image_url']
+            'storeproductimgurl' => $data['image_url'],
+            'VolWeight' => $data['VolWeight'],
+            'merchantproductid' => $data['merchantproductid']
         );
         $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_ADD_PRODUCT_CART, $params);
 
@@ -95,7 +113,7 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         );
 
         $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_GET_TOTAL_SHOPINGCART, $params);
-        
+
         return $this;
     }
 
@@ -144,6 +162,10 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         return "";
     }
 
+    public function getStoreCode() {
+        return 77;
+    }
+
     /*
      * Get Categories
      *
@@ -161,5 +183,27 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
         $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_CATEGORIES, $params);
         $jsonData = $response->getResponse()->{'Categories'};
         return $jsonData;
+    }
+
+    public function getValueAccessService()
+    {
+        $params = array(
+            "merchantCode" => $this->getMerchant(),
+            Skybox_Core_Model_Config::SKYBOX_PARAMETER_TOKEN => $this->getAuthorizedToken(),
+            Skybox_Core_Model_Config::SKYBOX_PARAMETER_GUID => $this->getGuidApi(),
+
+            Skybox_Core_Model_Config::SKYBOX_PARAMETER_MERCHANT => $this->getMerchant(),
+            'customeriplocal' => $this->_getConfig()->getHost(),
+            'customeripremote' => $this->_getConfig()->getRemoteAddr(),
+            'customeripproxy' => $this->_getConfig()->getProxy(),
+            'customerbrowser' => $this->_getConfig()->getUserAgent(),
+            'customerlanguages' => $this->_getConfig()->getLanguage()
+
+
+        );
+
+
+        return $params;
+
     }
 }

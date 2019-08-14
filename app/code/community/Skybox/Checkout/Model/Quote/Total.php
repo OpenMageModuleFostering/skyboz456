@@ -40,6 +40,10 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
      * su parte)
      **/
     public function collect(Mage_Sales_Model_Quote_Address $address) {
+        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        if(!$activation) {
+            return $this;
+        }
         if($this->_getApi()->getLocationAllow()){ // Rogged
 
         
@@ -52,6 +56,15 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
             }
 
             $quote= $address->getQuote();
+
+//            $quote = Mage::helper('checkout/cart')->getCart()->getQuote();
+            $shippingMethod = $quote->getShippingAddress()->getShippingMethod();
+            if($shippingMethod){
+                Mage::log('set shipping method null',null,'tracer.log',true);
+                $quote->getShippingAddress()->setShippingMethod(null);  //setting method to null
+                $quote->save();
+            }
+
             if(!$quote->isVirtual() && $address->getAddressType() == 'billing'){
                 return $this;
             }
@@ -186,7 +199,11 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
      * El cálculo ya se habrá hecho y deberíamos guardarlo en algún sitio para aquí,
      * simplemente retornar el valor formateado y que Magento lo muestre.
      */
-    public function fetch(Mage_Sales_Model_Quote_Address $address) {        
+    public function fetch(Mage_Sales_Model_Quote_Address $address) {
+        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        if(!$activation) {
+            return $this;
+        }
         if($this->_getApi()->getLocationAllow()){ // Rogged
             parent::fetch($address); //Comentado por verificar
 
@@ -215,7 +232,7 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
              */
             $i=0;        
             foreach ($ConceptsSkyboxjson as $item) {
-                if($item->Value > 0)
+                if($item->Visible != 0)
                 {
                     $i+=1;
                     $address->addTotal(array(
@@ -224,7 +241,7 @@ class Skybox_Checkout_Model_Quote_Total extends Mage_Sales_Model_Quote_Address_T
                             'value' => $item->Value
                         ));
                     Mage::log("quote->address->fetch(Concepts)->" . $item->Concept . "=" . $item->Value, null, 'TotalSales.log', true);
-                }            
+                }
             }
             Mage::log("quote->address->fetch : fin", null, 'TotalSales.log', true);        
             // Retornamos el total con su título

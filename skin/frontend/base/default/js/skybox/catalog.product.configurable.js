@@ -53,16 +53,16 @@ if (typeof Product != 'undefined') {
 
                     if (price_box) {
                         //console.log('price-box');
-                        $$('.price-box')[0].innerHTML = response;
+                        //$$('.price-box')[0].innerHTML = response;
                     }
                     if (price_box_bundle) {
                         //console.log('price-box-bundle');
-                        $$('.price-box-bundle')[0].innerHTML = response;
+                        //$$('.price-box-bundle')[0].innerHTML = response;
                     }
 
                     if (price_info) {
                         //console.log('price-info');
-                        $$('.price-info')[0].innerHTML = response;
+                        //$$('.price-info')[0].innerHTML = response;
                     }
 
                     jqueryButton();
@@ -101,9 +101,15 @@ if (typeof Product != 'undefined') {
             price = optionPrices + parseFloat(_productPrice);
             _priceInclTax += parseFloat(_productPrice) * (100 + this.currentTax) / 100;
 
+            console.log('Price incl tax: '+_priceInclTax);
+            console.log('Origin Tax: '+this.currentTax);
             var tax = price * (this.currentTax / 100);
+            console.log('Tax: '+tax);
             var excl = price;
-            var incl = excl + tax;
+            console.log('price reload: '+price);
+            // var incl = excl + tax;
+            var incl = excl;
+            console.log('Price + Tax: '+incl);
             var finalPrice = parseFloat(incl);
 
             this.url = SKYBOX_OPTIONS_PRICE_URL;
@@ -115,3 +121,5 @@ if (typeof Product != 'undefined') {
 
     Product.OptionsPrice = SkyboxOptionsPrice;
 }
+
+

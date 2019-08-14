@@ -114,6 +114,7 @@ class Skybox_Catalog_Block_Bundle_Price extends Mage_Bundle_Block_Catalog_Produc
      */
     protected function calculatePrice($product, $bundleType = 'bundle')
     {
+        //Mage::log(__FILE__.' # '.__LINE__.' ~ '. __METHOD__.' => enter calculatePrice', null, 'tracer.log', true);
         $stockItem = $product->getStockItem();
         if (!$stockItem->getIsInStock()) {
             return ''; // Out of Stock

@@ -26,7 +26,8 @@ class Skybox_International_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getActive()
     {
-        return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+//        return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+        return Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
     }
 
     public function getSkyboxLog()
@@ -47,6 +48,11 @@ class Skybox_International_Helper_Data extends Mage_Core_Helper_Abstract
     public function getSkyboxUrlMain()
     {
         return Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxurlmain', Mage::app()->getStore());
+    }
+
+    public function getEnabledAddSumTaxToPrice()
+    {
+        return Mage::getStoreConfig('skyboxinternational/skyboxproduct/skyboxaddtaxtopriceenable', Mage::app()->getStore());
     }
 
     public function getStoreId()

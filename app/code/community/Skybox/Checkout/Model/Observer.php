@@ -27,6 +27,7 @@ class Skybox_Checkout_Model_Observer
 
     protected $_typeProduct = 'skyboxcatalog/api_product';
     protected $_product = null;
+    protected $_enable = null;
 
     protected function _getProduct()
     {
@@ -34,6 +35,15 @@ class Skybox_Checkout_Model_Observer
             $this->_product = Mage::getModel($this->_typeProduct);
 
         return $this->_product;
+    }
+
+    private function isEnable() {
+        if ($this->_enable === null) {
+//            $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+            $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+            $this->_enable = $value;
+        }
+        return $this->_enable;
     }
 
     /**
@@ -48,6 +58,10 @@ class Skybox_Checkout_Model_Observer
 
     public function RemoveTax(Varien_Event_Observer $observer)
     {
+        if(!$this->isEnable()) {
+            return;
+        }
+
         Mage::log('RemoveTax->ini', null, 'SkyObserver.log', true);
         $customer_id = Mage::getSingleton('customer/session')->getId();
         $customer = Mage::getModel("customer/customer")->load($customer_id);
@@ -64,6 +78,9 @@ class Skybox_Checkout_Model_Observer
 
     public function CalculatePriceQuoteItem(Varien_Event_Observer $observer)
     {
+        if(!$this->isEnable()) {
+            return $this;
+        }
         Mage::log('Observer->CalculatePriceQuoteItem->ini', null, 'cart.log', true);
 
         $event = $observer->getEvent();
@@ -146,6 +163,9 @@ class Skybox_Checkout_Model_Observer
 
     public function changeQuoteAddressSkybox(Varien_Event_Observer $observer)
     {
+        if(!$this->isEnable()) {
+            return $this;
+        }
         if($this->_getApi()->getLocationAllow()){
             Mage::log('Observer->changeQuoteAddressSkybox : ini', null, 'TotalSales.log', true);
             /* $quote Mage_Sales_Model_Quote */
@@ -182,8 +202,8 @@ class Skybox_Checkout_Model_Observer
             //$totalTax1= $address->getTaxAmount();
 
             //Estas lineas se agregaron para elimnar el Tax del Carrito
-            $address->setTaxAmount(0);
-            $address->setBaseTaxAmount(0);
+             $address->setTaxAmount(0);
+             $address->setBaseTaxAmount(0);
 
             $applied_taxes = array();
 
@@ -229,7 +249,7 @@ class Skybox_Checkout_Model_Observer
             $address->setPriceInclTax($totals);
             $address->setBasePriceInclTax($baseTotals);
 
-
+            $totals =  floatval(preg_replace("/[^-0-9\.]/","",$totals));
             //$address->setGrandTotal($totals+$totalTax);
             $address->setGrandTotal($totals+$totalTax);
             $address->setBaseGrandTotal($baseTotals+$totalTax);

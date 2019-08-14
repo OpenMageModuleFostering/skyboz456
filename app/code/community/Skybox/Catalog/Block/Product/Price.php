@@ -76,13 +76,22 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
      */
     public function _toHtml()
     {
-        if($this->_getApi()->getLocationAllow()){ // Rogged
+//        $activation = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+        $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+
+        if (!$activation) {
+            return '';
+        }
+        $typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
+        //Mage::log(print_r('product\Price::_toHtml', true), null, 'tracer.log', true);
+        if($this->_getApi()->getLocationAllow()  && ($typeIntegration!=3)){ // Rogged
             if ($this->_getApi()->getErrorAuthenticate() && !$this->_getApi()->getLocationAllow() && $this->_getApi()->HasError()) {
                 return '';
             } elseif ($this->_getApi()->HasError()) {
                 //$error_code = $this->_getApi()->getStatusCode();
                 $message = $this->_getApi()->getStatusMessage();
-                return '<div style="color:#FF0000;">' . $message . '</div>';
+                return '';
+//                return '<div style="color:#FF0000;">' . $message . '</div>';
             }
 
             /* @var $product Mage_Catalog_Model_Product */
@@ -90,10 +99,13 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
             $type = $product->getTypeId();
             $route_name = Mage::app()->getRequest()->getRouteName();
 
+//            Mage::log(print_r('$route_name: '. $route_name, true), null, 'tracer.log', true);
+
             // Simple Product
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/price.phtml') {
                 return $this->calculatePrice($product);
             }
+
 
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $this->getTemplate() == 'catalog/product/view/price_clone.phtml') {
                 return '';
@@ -101,9 +113,14 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
 
             // Configurable Product
             if ($type == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE && $this->getTemplate() == 'catalog/product/price.phtml') {
-                if ($route_name == 'catalog') {
+                /*if ($route_name == 'catalog') {
                     return '';
+                }*/
+
+                if(Mage::registry('current_product')) {
+                    return "";
                 }
+
                 return $this->calculatePrice($product);
             }
 
@@ -125,27 +142,65 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
      */
     protected function calculatePrice($product)
     {
+        //Mage::log('Entro calcular producto', null, 'tracer.log', true);
         $stockItem = $product->getStockItem();
-        if (!$stockItem->getIsInStock()) {
-            return ''; // Out of Stock
-        }
+//        if (!$stockItem->getIsInStock()) {
+//            Mage::log('sin stock', null, 'tracer.log', true);
+//            return ''; // Out of Stock
+//        }
 
         $type = $product->getTypeId();
-        switch ($type) {
-            case 'simple':
-                $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
-                    ->GetTemplateProduct();
-                break;
-            case 'configurable':
-                $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
-                    ->GetTemplateProduct();
-                break;
-            case 'bundle':
-                $template = $this->_getApi()->CalculatePrice($product, null, $product->getFinalPrice(), 'simple')
-                    ->GetTemplateProduct();
-                break;
+        //Mage::log(print_r('product\Price: '.$type, true), null, 'tracer.log', true);
+
+        if (Mage::registry('current_category')){
+            /*Async Ini*/
+            $session = Mage::getSingleton("core/session",  array("name"=>"frontend"));
+            $skyboxPrecio = $session->getData("skyBox");
+            /*
+                    if($product->getTypeId() == "simple"){
+                        $parentIds = Mage::getModel('catalog/product_type_grouped')->getParentIdsByChild($product->getId());
+                        if(!$parentIds)
+                            $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+                        if(isset($parentIds[0])){
+                            $parent = Mage::getModel('catalog/product')->load($parentIds[0]);
+                            // do stuff here
+                        }
+                    }*/
+            $template = $skyboxPrecio[$product->getId()];
+            $template = '<div class="skybox-price-set" product-id="' . $product->getId() . '" id="product-' . $product->getId() . '"></div>';
+            /*Async End*/
+        } else {
+            switch ($type) {
+                case 'simple':
+                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
+                        ->GetTemplateProduct();
+                    break;
+                case 'configurable':
+                    $template = $this->_getApi()->CalculatePrice($product->getId(), null, $product->getFinalPrice(), $product->getTypeId())
+                        ->GetTemplateProduct();
+                    break;
+                case 'bundle':
+                    $template = $this->_getApi()->CalculatePrice($product, null, $product->getFinalPrice(), 'simple')
+                        ->GetTemplateProduct();
+                    break;
+            }
         }
 
+//        Mage::log(print_r('##Product template##', true), null, 'tracer.log', true);
+//        Mage::log(print_r($template, true), null, 'tracer.log', true);
+        /*
+        $extraHtml = ''
+            . '<div class="price-box">'
+            . '<p class="label" id="skybox-configurable-price-from-'
+            . $product->getId()
+            . $this->getIdSuffix()
+            . '">'
+            . $template
+            . '</p>'
+            . '</div>'
+            . '<div style="clear:both"></div>';
+
+        */
         $extraHtml = ''
             . '<div class="price-box">'
             . '<p class="label" id="skybox-configurable-price-from-'

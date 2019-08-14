@@ -11,9 +11,10 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
 {
     public function indexAction()
     {
+        //Mage::log(__FILE__.' # '.__LINE__.' ~ '. __METHOD__.' => enter index', null, 'tracer.log', true);
         $_checkout = Mage::getModel('skyboxcheckout/api_checkout');
         $_checkout->InitializeBarSkybox();
-        
+
         $return_url = ($this->getRequest()->getParam('return_url')) ?
             $this->getRequest()->getParam('return_url') :
             Mage::helper('core/url')->getHomeUrl();
@@ -31,7 +32,9 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
         # check if local skybox shopping cart and skybox-checkout match
         $differentqty=0;
         $api_mproduct=Mage::getModel('skyboxcatalog/api_product');
-        if(count($quote->getAllItems())!=$CartItemCount and $api_mproduct->getLocationAllow()){
+//        Mage::log('entro getAllItems $CartItemCount',null,'tracer.log',true);
+//        Mage::log((int)$quote->getItemsQty() .'-'.$CartItemCount,null,'tracer.log',true);
+        if((int)$quote->getItemsQty() != $CartItemCount && $api_mproduct->getLocationAllow()){
             $differentqty=1;
         }
         /*-----------------------------------------*/
@@ -41,10 +44,23 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             /*---------------- Rogged ------------------*/
             if($differentqty==1){
                 $cart = Mage::getModel('skyboxcheckout/cart');
+
+                /* NOTE: Skip - Change country  */
+
+                if ($item->getProductType() === 'simple' && !$parentItem) {
+                    $productModel = Mage::getModel('catalog/product')->load($item->getProductId());
+                    $paramsRequest=array();
+                    $paramsRequest['product']=$item->getProductId();
+                    $paramsRequest['qty']=$item->getQty();
+                    $cart->removeItem($item->getItemId());
+                    $cart->addProduct($productModel,$paramsRequest);
+                }
+                /* end  */
+
                 if ($item->getProductType() === 'simple' && $parentItem) {
                     $paramsRequest=array();
                     $productParentId=Mage::getModel('catalog/product_type_configurable')
-                        ->getParentIdsByChild($item->getProductId()); 
+                        ->getParentIdsByChild($item->getProductId());
                     $productParentId=$productParentId[0];
                     $productModel = Mage::getModel('catalog/product')->load($productParentId);
                     $_typeInstance = $productModel->getTypeInstance(true);
@@ -64,23 +80,23 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
                     $cart->removeItem($parentItemId);
                     $cart->addProduct($productModel,$paramsRequest);
                 }
-                if ($item->getProductType() === 'simple' && !$parentItem && $item->getPriceSkybox()) {
-                    $productModel = Mage::getModel('catalog/product')->load($item->getProductId());
-                    $paramsRequest=array();
-                    $paramsRequest['product']=$item->getProductId();
-                    $paramsRequest['qty']=$item->getQty();
-                    $cart->removeItem($item->getItemId());
-                    $cart->addProduct($productModel,$paramsRequest);
-                }
+//                if ($item->getProductType() === 'simple' && !$parentItem && $item->getPriceSkybox()) {
+//                    $productModel = Mage::getModel('catalog/product')->load($item->getProductId());
+//                    $paramsRequest=array();
+//                    $paramsRequest['product']=$item->getProductId();
+//                    $paramsRequest['qty']=$item->getQty();
+//                    $cart->removeItem($item->getItemId());
+//                    $cart->addProduct($productModel,$paramsRequest);
+//                }
             }
             /*----------------------------------------*/
 
 
-             Mage::log("process", null, 'process.log', true);
+            Mage::log("process", null, 'process.log', true);
             //Mage::log("ITEM Class: " . get_class($item), null, 'cart.log', true);
             //Mage::log("ITEM Id: " . $item->getProductId(), null, 'cart.log', true);
 
-            
+
 
             /*if ($item->getProductType() === 'configurable') continue;
             if ($item->getProductType() === 'simple' && $parentItem && !$item->getPriceSkybox()) continue;
@@ -107,11 +123,14 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             /* Cuando se cambia de country no allow a otro country allow, no hay precio en skybox registrado, por eso tomamos el precio de tienda  */
 
             if($api_mproduct->getLocationAllow() && !$item->getPriceSkybox()){
-                 $item->setPriceSkybox($item->getPrice());
+                $item->setPriceSkybox($item->getPrice());
             }
             /* -- ----- --*/
 
             #echo $item->getPrice()." - ".$item->getPriceSkybox()."<br>";
+
+            $productModel = Mage::getModel('catalog/product')->load($item->getProductId());
+//            Mage::log(print_r($productModel->getFinalPrice(), true), null, 'processcontroller.log', true);
 
             if ($item->getProductType() === 'configurable'){
 
@@ -135,7 +154,7 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
             if ($item->getProductType() === 'simple' && $parentItem) {
 
                 $item = $parentItem;
-                $product_api->CalculatePrice($item->getProductId(), null, $item->getPriceUsdSkybox());
+                $product_api->CalculatePrice($item->getProductId(), null, $productModel->getFinalPrice());
                 Mage::log("simple3", null, 'processcontroller.log', true);
             }
 
@@ -182,7 +201,9 @@ class Skybox_Checkout_ProcessController extends Mage_Core_Controller_Front_Actio
              */
             //$item->setOriginalCustomPrice($product_api->getTotalPriceUSD());
             //$item->setOriginalCustomPrice($total);
-            $item->setOriginalCustomPrice($product_api->getPrice());
+            $prices = str_replace(',','',$product_api->getPrice());
+            $prices = number_format((float)($prices),2, ',', '.');
+            $item->setOriginalCustomPrice($prices);
             //$item->setOriginalCustomPrice($product_api->getPrice());
             //$skybox_total = str_replace(",", "", $product_api->getTotalPrice());
             $skybox_total = str_replace(",", "", $product_api->getPrice());

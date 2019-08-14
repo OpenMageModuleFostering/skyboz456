@@ -60,6 +60,7 @@
                         <xsd:element minOccurs="1" maxOccurs="1" name="CityName" type="xsd:string" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="CountryId" type="xsd:string" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="RegionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="RegionName" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>

@@ -90,6 +90,11 @@ class Skybox_Core_Model_Standard
         return $this->_getHelper()->getMerchantKey();
     }
 
+    public function getEnabledAddSumTaxToPrice()
+    {
+        return $this->_getHelper()->getEnabledAddSumTaxToPrice();
+    }
+
     public function getWeightUnit()
     {
         return $this->_getHelper()->getWeightUnit();
@@ -121,7 +126,13 @@ class Skybox_Core_Model_Standard
 
     public function getLocationAllow()
     {
-        return $this->_api->getLocationAllow() == "1";
+        //return $this->_api->getLocationAllow() == "1";
+        return $this->_api->getLocationAllow();
+    }
+
+    public function getStoreCode()
+    {
+        return $this->_api->getStoreCode();
     }
 
     public function getErrorAuthenticate()
@@ -199,6 +210,9 @@ class Skybox_Core_Model_Standard
 
     public function CallApiRest($action, $params)
     {
+
+        $start = microtime(true);
+
         Mage::log("CallApiRest ", null, 'standart.log', true);
 
         $successService = false;
@@ -249,6 +263,10 @@ class Skybox_Core_Model_Standard
             //Mage::throwException('Error: al comunicarse con el servidor, si el error persiste comunicarse con su administrador');
             //Mage::helper('skyboxcore/email')->sendAPIError($e->getMessage());
         }
+
+
+        $total_time = round(microtime(true)-$start, 4);
+        Mage::log('Servicio generado ['.$action.']: '.$total_time.' segundos.', null, 'timer.log',true);
 
         return $this;
     }

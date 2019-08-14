@@ -79,6 +79,7 @@ class Skybox_Core_Model_Config
     const SKYBOX_PARAMETER_RESPONSE_STATUS = "StatusCode";
     const SKYBOX_PARAMETER_RESPONSE_BARHTML = "BarHtmlTemplate";
     const SKYBOX_PARAMETER_RESPONSE_LOCATION_ALLOW = "LocationAllow";
+    const SKYBOX_PARAMETER_RESPONSE_STORE_CODE = "StoreCode";
     const SKYBOX_PARAMETER_RESPONSE_BUTTONHTML = "HtmlTemplate";
     const SKYBOX_PARAMETER_RESPONSE_BUTTONERRORHTML = "HtmlTemplateError";
     const SKYBOX_PARAMETER_RESPONSE_BUTTONERROR = "CalcErrorCode";

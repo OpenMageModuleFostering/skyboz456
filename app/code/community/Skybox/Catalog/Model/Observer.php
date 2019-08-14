@@ -16,22 +16,44 @@
  */
 class Skybox_Catalog_Model_Observer
 {
+    private function getActive() {
+//        $value = (bool)Mage::getStoreConfig('skyboxinternational/skyboxsettings/skyboxactive', Mage::app()->getStore());
+        $value = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+        return $value;
+    }
+
     public function hookToControllerActionPreDispatch($observer)
     {
-        if ($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add') {
+        $active = $this->getActive();
+        if (!$active) { return; }
+
+        //Mage::log('router tivoli: '.$observer->getEvent()->getControllerAction()->getFullActionName(), null, 'tracer.log', true);
+        if (($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add')) {
+
+            //Mage::log('hookToControllerActionPreDispatch '.$observer->getEvent()->getControllerAction()->getFullActionName(),null, 'tracer.log', true);
             Mage::dispatchEvent("add_to_cart_before", array('request' => $observer->getControllerAction()->getRequest()));
         }
     }
 
     public function hookToControllerActionPostDispatch($observer)
     {
-        if ($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add') {
+        $active = $this->getActive();
+        if (!$active) { return; }
+
+        //Mage::log('router tivoli: '.$observer->getEvent()->getControllerAction()->getFullActionName(), null, 'tracer.log', true);
+        if (($observer->getEvent()->getControllerAction()->getFullActionName() == 'checkout_cart_add')) {
+
+            //Mage::log('hookToControllerActionPostDispatch: '.$observer->getEvent()->getControllerAction()->getFullActionName(),null, 'tracer.log', true);
             Mage::dispatchEvent("add_to_cart_after", array('request' => $observer->getControllerAction()->getRequest()));
         }
     }
 
     public function hookToAddToCartBefore($observer)
     {
+        $active = $this->getActive();
+        if (!$active) { return; }
+
+        //Mage::log('function hookToAddToCartBefore: ',null, 'tracer.log', true);
         $key = Mage::getSingleton('core/session')->getFormKey();
         $observer->getEvent()->getRequest()->setParam('form_key', $key);
         $request = $observer->getEvent()->getRequest()->getParams();
@@ -39,12 +61,18 @@ class Skybox_Catalog_Model_Observer
 
     public function hookToAddToCartAfter($observer)
     {
+        $active = $this->getActive();
+        if (!$active) { return; }
+
         $request = $observer->getEvent()->getRequest()->getParams();
-        //Mage::log("hookToAddToCartAfter ".print_r($request,true)." is added to cart.", null, 'cart.log', true);
+        Mage::log("hookToAddToCartAfter ".print_r($request,true)." is added to cart.", null, 'cart.log', true);
     }
 
     public function injectTab(Varien_Event_Observer $observer)
     {
+//        $active = $this->getActive();
+//        if (!$active) { return; }
+
         // core_block_abstract_prepare_layout_after
 
         /* $block Mage_Adminhtml_Block_Catalog_Category_Tabs */
