@@ -156,7 +156,8 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
 
         // if ($multiCalculate and Mage::registry('current_category') and (!(Mage::registry('current_product')))) {
 
-        if ($multiCalculate && Mage::registry('current_category')) {
+//        if ($multiCalculate && Mage::registry('current_category')) {
+        if ($multiCalculate) {
             /**
              * Apply multiple calculate start
              * When: is different to product detail and you are on catalog category

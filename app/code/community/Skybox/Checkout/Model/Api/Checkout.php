@@ -61,8 +61,8 @@ class Skybox_Checkout_Model_Api_Checkout extends Skybox_Core_Model_Standard
             $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
             $session->setData("callToSkyBox", false);
         }
-        $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
-        $session->setData("callToSkyBox", false);
+//        $response = $this->CallApiRest(Skybox_Core_Model_Config::SKYBOX_ACTION_INITIALICE, $params)->getResponse();
+//        $session->setData("callToSkyBox", false);
         /**
          * only one time for call to service end
          */
