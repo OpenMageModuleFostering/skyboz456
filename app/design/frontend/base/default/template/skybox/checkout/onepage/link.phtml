@@ -23,20 +23,16 @@
  * @copyright   Copyright (c) 2006-2016 X.commerce, Inc. and affiliates (http://www.magento.com)
  * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<?php
-$api = Mage::getModel('skyboxcatalog/api_product');
-//$typeIntegration = Mage::getStoreConfig('settings/typeIntegration');
-$typeIntegration = Mage::helper('skyboxinternational/data')->getSkyboxIntegration();
 
-if (($api->getLocationAllow()==3) && $typeIntegration==3):
-?>
-<button type="button"
-
-        class="button btn-proceed-checkout btn-checkout"
-        onclick="window.location='<?php echo $this->getUrl('skbcheckout/international', array('_secure'=>true)) ?>';">
-    <span>
-        <span><?php echo $this->__('Checkout with SkyBOX Checkout') ?></span>
-    </span>
-</button>
-<?php endif;?>
+$allowHelper = Mage::helper('skyboxcore/allow');
+if ($allowHelper->isCartButtonSkyboxEnabled()) :
+    ?>
+    <button type="button"
+            class="button btn-proceed-checkout btn-checkout"
+            onclick="window.location='<?php echo $this->getUrl('skbcheckout/international',
+                array('_secure' => true)) ?>';">
+        <span>
+            <span><?php echo $this->__('Checkout with SkyBOX Checkout') ?></span>
+        </span>
+    </button>
+<?php endif; ?>

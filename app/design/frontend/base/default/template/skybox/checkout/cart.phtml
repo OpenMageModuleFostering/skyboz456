@@ -23,10 +23,10 @@ if ($_helper->getActive()) {
 
     $change_country = false;
 
-    $request = $this->getRequest();
-    $module = $request->getModuleName();
-    $controller = $request->getControllerName();
-    $action = $request->getActionName();
+//    $request = $this->getRequest();
+//    $module = $request->getModuleName();
+//    $controller = $request->getControllerName();
+//    $action = $request->getActionName();
     $getHomeUrl = Mage::helper('core/url')->getHomeUrl();
     $urlCheckCart = Mage::getUrl("checkout/cart");
 
@@ -140,7 +140,7 @@ if ($_helper->getActive()) {
             ?>
             <script type="text/javascript">
                 console.log("[Skybox] Reloading page...");
-                window.location.reload(true);
+//                window.location.reload(true);
             </script>
             <?php
         endif;

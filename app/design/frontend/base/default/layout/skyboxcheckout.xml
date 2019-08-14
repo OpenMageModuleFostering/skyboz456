@@ -28,6 +28,7 @@
     Shopping cart item renderer
     -->
     <checkout_cart_index>
+        <remove name="top.container"/>
         <reference name="checkout.cart.methods">
             <block type="core/template" before="content" name="skybox.checkout.cart.methods.onepage.bottom"
                    template="skybox/checkout/onepage/link.phtml"/>

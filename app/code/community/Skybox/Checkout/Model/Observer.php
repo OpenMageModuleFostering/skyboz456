@@ -320,11 +320,9 @@ class Skybox_Checkout_Model_Observer
     {
         $event = $observer->getEvent();
         $result = $event->getResult();
-        if ($this->_getApi()->getLocationAllow()) {
-            $result->isAvailable = false;
-        } else {
-            $result->isAvailable = true;
-        }
+
+        $allowHelper = Mage::helper('skyboxcore/allow');
+        $result->isAvailable = ($allowHelper->isPriceEnabled()) ? false : true ;
 
     }
 }

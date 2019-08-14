@@ -13,10 +13,8 @@
  */
 class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Price
 {
-    /*
-    * @var string $_cache_code
-    */
     public $_cache_code = null;
+    public $_sky_cache_code = null;
 
     public function getCacheCode()
     {
@@ -163,17 +161,10 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
              * Apply multiple calculate start
              * When: is different to product detail and you are on catalog category
              */
-            $template = '<div class="skybox-price-set" product-id="' . $product->getId() . '" id="product-' . $product->getId() . '"></div>';
-            /*
-                if($product->getTypeId() == "simple"){
-                    $parentIds = Mage::getModel('catalog/product_type_grouped')->getParentIdsByChild($product->getId());
-                    if(!$parentIds)
-                        $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
-                    if(isset($parentIds[0])){
-                        $parent = Mage::getModel('catalog/product')->load($parentIds[0]);
-                        // do stuff here
-                    }
-                }*/
+            // $template = '<div class="skybox-price-set" product-id="' . $product->getId() . '" id="product-' . $product->getId() . '"></div>';
+
+            $cache_code = $this->getSkyboxCacheCode($product->getId());
+            $template = '<div class="skybox-price-set" product-id="' . $cache_code . '" id="product-' . $product->getId() . '"></div>';
 
             /**
              * Apply multiple calculate end
@@ -229,7 +220,6 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
         return $extraHtml;
     }
 
-
     /**
      * Return the Language Id
      * @return int
@@ -240,5 +230,26 @@ class Skybox_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Pric
         $cart = $_config->getSession()->getCartSkybox();
         $id = $cart->{'LanguageId'};
         return intval($id);
+    }
+
+    /**
+     * Return the Skybox Cache code
+     *
+     * @param $productId
+     * @return mixed
+     */
+    public function getSkyboxCacheCode($productId)
+    {
+        if ($this->_sky_cache_code == null) {
+            /* @var $config Skybox_Core_Model_Config */
+            $config = Mage::getModel("skyboxcore/config");
+            $skyboxUser = $config->getSession()->getSkyboxUser();
+            $country_iso_code = strtoupper($skyboxUser->CartCountryISOCode);
+            $cache_code = $country_iso_code . "[REPLACE]" . $skyboxUser->CartCurrencyISOCode;
+            $this->_sky_cache_code = $cache_code;
+        }
+
+        $result = str_replace('[REPLACE]', $productId, $this->_sky_cache_code);
+        return $result;
     }
 }

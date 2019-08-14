@@ -12,6 +12,8 @@
  */
 class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
 {
+    public $_sky_cache_code = null;
+
     /**
      * Retrieve API Product
      *
@@ -62,7 +64,8 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
             }
 
             $response = $this->multiCalculatePrice($skyBoxUrlClient, $dataJson);
-            // Mage::log(print_r($response, true), null, 'multicalculate.log', true);
+//            Mage::log(print_r($response, true), null, 'multicalculate.log', true);
+//            Mage::log(print_r($dataJson, true), null, 'multicalculate.log', true);
 
         } catch (\Exception $e) {
             $multiCalculate = 0;
@@ -74,6 +77,27 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
         Mage::register('skybox_multicalculate', $multiCalculate);
         // Mage::registry('skybox_multicalculate');
 
+        return $result;
+    }
+
+    /**
+     * Return the Skybox Cache code
+     *
+     * @param $productId
+     * @return mixed
+     */
+    public function getSkyboxCacheCode($productId)
+    {
+        if ($this->_sky_cache_code == null) {
+            /* @var $config Skybox_Core_Model_Config */
+            $config = Mage::getModel("skyboxcore/config");
+            $skyboxUser = $config->getSession()->getSkyboxUser();
+            $country_iso_code = strtoupper($skyboxUser->CartCountryISOCode);
+            $cache_code = $country_iso_code . "[REPLACE]" . $skyboxUser->CartCurrencyISOCode;
+            $this->_sky_cache_code = $cache_code;
+        }
+
+        $result = str_replace('[REPLACE]', $productId, $this->_sky_cache_code);
         return $result;
     }
 
@@ -98,6 +122,12 @@ class Skybox_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_List
             case 'bundle':
                 $template = $this->_getApi()->getUrl($product, null, $product->getFinalPrice(), 'simple');
                 break;
+        }
+
+        if (is_array($template)) {
+            $productId = $template['htmlobjectid'];
+            $cache_code = $this->getSkyboxCacheCode($productId);
+            $template['htmlobjectid'] = $cache_code;
         }
         return $template;
     }
