@@ -49,9 +49,11 @@ class Skybox_Checkout_Model_Quote_Address_Total_Rmt extends Mage_Sales_Model_Quo
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
         $activation = Mage::getModel('skyboxcore/api_restful')->isModuleEnable();
+
         if (!$activation) {
             return $this;
         }
+
         parent::fetch($address);
 
         $quote = $address->getQuote();
@@ -59,29 +61,32 @@ class Skybox_Checkout_Model_Quote_Address_Total_Rmt extends Mage_Sales_Model_Quo
             return $this;
         }
 
-        $RmtSkyboxjson = json_decode($address->getRmtSkybox());
+        $skyboxRMT = $address->getRmtSkybox();
 
-        Mage::log("quote->address->rmt->fetch : ini", null, 'TotalSales.log', true);
+        if ($skyboxRMT) {
+            $RmtSkyboxjson = json_decode($skyboxRMT);
 
-        $i = 0;
-        foreach ($RmtSkyboxjson as $item) {
-            $i += 1;
-            $value = $item->Value;
-            $value = str_replace(',', '', $value);
-            // $value = abs($value);
+            Mage::log("quote->address->rmt->fetch : ini", null, 'TotalSales.log', true);
 
-            $address->addTotal(array(
-                'code' => 'checkout_total_rmt' . $i,
-                'title' => $item->Concept,
-                'value' => $value
-            ));
-            Mage::log("quote->address->rmt->fetch(Concepts)->" . $item->Concept . "=" . $item->Value, null,
-                'TotalSales.log', true);
+            $i = 0;
+            foreach ($RmtSkyboxjson as $item) {
+                $i += 1;
+                $value = $item->Value;
+                $value = str_replace(',', '', $value);
+                // $value = abs($value);
+
+                $address->addTotal(array(
+                    'code' => 'checkout_total_rmt' . $i,
+                    'title' => $item->Concept,
+                    'value' => $value
+                ));
+                Mage::log("quote->address->rmt->fetch(Concepts)->" . $item->Concept . "=" . $item->Value, null,
+                    'TotalSales.log', true);
+            }
+
+            Mage::log("quote->address->rmt->fetch : fini", null, 'TotalSales.log', true);
+
         }
-
-        Mage::log("quote->address->rmt->fetch : fini", null, 'TotalSales.log', true);
-
-        // Retornamos el total con su título
         return $this;
     }
 }
